@@ -100,6 +100,10 @@ class _AddContactState extends State<AddContact> {
         'phonenumber': phoneNumberController.text,
         'email': emailController.text,
         'uid': selectedUser!['uid'],
+        'reference': FirebaseFirestore.instance
+            .collection(collectionToSaveIn)
+            .doc(selectedUser!['uid'])
+            .path,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

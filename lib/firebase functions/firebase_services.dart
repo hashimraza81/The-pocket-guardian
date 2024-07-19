@@ -20,6 +20,16 @@ class FirebaseFunctions {
       return;
     }
 
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
@@ -71,6 +81,9 @@ class FirebaseFunctions {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
+      // Obtain the current device token
+      String? currentDeviceToken = await FirebaseMessaging.instance.getToken();
+
       // Try to find the user in trackUsers collection
       DocumentSnapshot trackUserDoc = await FirebaseFirestore.instance
           .collection('trackUsers')
@@ -79,6 +92,7 @@ class FirebaseFunctions {
 
       if (trackUserDoc.exists) {
         // User found in trackUsers collection
+        await _updateDeviceTokenIfNeeded(trackUserDoc, currentDeviceToken);
         Navigator.pushReplacementNamed(context, RoutesName.home);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -96,6 +110,7 @@ class FirebaseFunctions {
 
       if (trackingUserDoc.exists) {
         // User found in trackingUsers collection
+        await _updateDeviceTokenIfNeeded(trackingUserDoc, currentDeviceToken);
         Navigator.pushReplacementNamed(context, RoutesName.hometracking);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User signed in successfully')),
@@ -129,6 +144,20 @@ class FirebaseFunctions {
       // Handle any other errors
       print('Error signing in user: $error');
       customAlertBox(context, 'An unexpected error occurred: $error');
+    }
+  }
+
+  static Future<void> _updateDeviceTokenIfNeeded(
+    DocumentSnapshot userDoc,
+    String? currentDeviceToken,
+  ) async {
+    String? storedDeviceToken = userDoc.get('deviceToken');
+
+    if (storedDeviceToken != currentDeviceToken) {
+      // Update the device token in Firestore
+      await userDoc.reference.update({
+        'deviceToken': currentDeviceToken,
+      });
     }
   }
 

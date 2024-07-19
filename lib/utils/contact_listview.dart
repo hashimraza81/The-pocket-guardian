@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gentech/app%20notification/push_notification.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/firebase%20functions/firebase_services.dart';
@@ -240,6 +241,12 @@ class IconButtonWithMenu extends StatelessWidget {
             () {
               Provider.of<OptionProvider>(context, listen: false)
                   .setSelectedOption("App notifications");
+              print('hashum');
+
+              PushNotification.sendNotificationToSelectedRole(
+                  "e6m3sesTRgiHp8gb1DKJFH:APA91bHxEFfS9vvU2U7Tt4nNtckCsNZI3OEbrz6Qn-squWTESeltGnTMNwf56p1bXofPdY7053M9rDPPQZ1Iuf6EFBn3L0wXcwdb2bGoMaGPwXW2DxxZwLGmss9yrTpFWcQd3_SK7dsq",
+                  context,
+                  '123');
               Navigator.pop(context);
             },
           ),

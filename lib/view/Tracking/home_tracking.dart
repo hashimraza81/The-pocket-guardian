@@ -1,11 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
+import 'package:gentech/provider/profile_Provider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/routes/routes_names.dart';
 import 'package:gentech/utils/contact_listview.dart';
@@ -50,28 +49,20 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    fetchProfileImage(context);
+    fetchUserProfile(context);
   }
 
-  Future<void> fetchProfileImage(BuildContext context) async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      String userRole =
-          Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
+  Future<void> fetchUserProfile(BuildContext context) async {
+    String userRole =
+        Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
 
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection(userRole == 'Track' ? 'trackUsers' : 'trackingUsers')
-          .doc(user.uid)
-          .get();
-
-      setState(() {
-        profileImageUrl = userDoc['imageUrl'];
-      });
-    }
+    await Provider.of<UserProfileProvider>(context, listen: false)
+        .fetchUserProfile(context, userRole);
   }
 
   @override
   Widget build(BuildContext context) {
+    final userProfileProvider = Provider.of<UserProfileProvider>(context);
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.sccafold,
@@ -113,10 +104,12 @@ class _MainScreenState extends State<MainScreen> {
                         },
                         child: CircleAvatar(
                           radius: 30.r,
-                          backgroundImage: profileImageUrl.isNotEmpty
-                              ? NetworkImage(profileImageUrl)
-                              : const AssetImage(AppImages.men)
-                                  as ImageProvider,
+                          backgroundImage:
+                              userProfileProvider.profileImageUrl.isNotEmpty
+                                  ? NetworkImage(
+                                      userProfileProvider.profileImageUrl)
+                                  : const AssetImage(AppImages.men)
+                                      as ImageProvider,
                           backgroundColor: Colors.transparent,
                         ),
                       ),
@@ -245,9 +238,9 @@ class ReusedContainer extends StatelessWidget {
           color: AppColors.white,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 16.0,
-            horizontal: 33.0,
+          padding: EdgeInsets.symmetric(
+            vertical: 16.0.h,
+            horizontal: 33.0.w,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
