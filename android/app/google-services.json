@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "208166400766",
+    "project_id": "gentech-4aa53",
+    "storage_bucket": "gentech-4aa53.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:208166400766:android:5208945df8cfb604296baf",
+        "android_client_info": {
+          "package_name": "com.example.gentech"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy0LudoUR62bIODsj_D0JPPeUOKvR1lQo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
