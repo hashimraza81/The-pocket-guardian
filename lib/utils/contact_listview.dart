@@ -203,6 +203,22 @@ class IconButtonWithMenu extends StatelessWidget {
     return null;
   }
 
+  Future<String?> _getCurrentUserName(
+      BuildContext context, String userId) async {
+    try {
+      String userRole =
+          Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
+      CollectionReference users = FirebaseFirestore.instance
+          .collection(userRole == 'Track' ? 'trackUsers' : 'trackingUsers');
+
+      DocumentSnapshot userDoc = await users.doc(userId).get();
+      return userDoc['name'];
+    } catch (e) {
+      print('Error retrieving user name: $e');
+      return null;
+    }
+  }
+
   void _showDialog(BuildContext context) {
     final RenderBox renderBox =
         _key.currentContext!.findRenderObject() as RenderBox;
@@ -305,19 +321,26 @@ class IconButtonWithMenu extends StatelessWidget {
                   User? currentUser = FirebaseAuth.instance.currentUser;
                   if (currentUser != null) {
                     String senderId = currentUser.uid;
-                    String mapsUrl =
-                        'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
-                    String body = mapsUrl;
-                    await PushNotification.sendNotificationToSelectedRole(
-                      deviceToken,
-                      context,
-                      senderId,
-                      receiverId,
-                      position.latitude,
-                      position.longitude,
-                      "Notification",
-                      body,
-                    );
+                    String? senderName =
+                        await _getCurrentUserName(context, senderId);
+                    if (senderName != null) {
+                      String mapsUrl =
+                          'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
+                      String body = mapsUrl;
+                      await PushNotification.sendNotificationToSelectedRole(
+                        deviceToken,
+                        context,
+                        senderId,
+                        senderName,
+                        receiverId,
+                        position.latitude,
+                        position.longitude,
+                        "Notification",
+                        body,
+                      );
+                    } else {
+                      print('Failed to retrieve sender name.');
+                    }
                   } else {
                     print('Failed to retrieve current user ID.');
                   }
@@ -329,6 +352,7 @@ class IconButtonWithMenu extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
+
           // () async {
           //   var latalng = _onLocationIconTapped();
           //   Provider.of<OptionProvider>(context, listen: false)

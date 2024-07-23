@@ -59,6 +59,7 @@ class PushNotification {
     String deviceToken,
     BuildContext context,
     String senderId,
+    String senderName,
     String receiverId,
     double lat,
     double lng,
@@ -68,6 +69,7 @@ class PushNotification {
     final firestore = FirebaseFirestore.instance;
     await firestore.collection('pushNotifications').add({
       'senderId': senderId,
+      'senderName': senderName,
       'receiverId': receiverId,
       'senderlocation': {
         'lat': lat,
