@@ -234,13 +234,13 @@ class ReusedContainer extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(10.0.r),
           color: AppColors.white,
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: 16.0.h,
-            horizontal: 33.0.w,
+            horizontal: 20.0.w,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -249,8 +249,8 @@ class ReusedContainer extends StatelessWidget {
               11.0.ph,
               Text(
                 text,
-                style: const TextStyle(
-                  fontSize: 14.0,
+                style: TextStyle(
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
                   fontFamily: 'Montserrat',

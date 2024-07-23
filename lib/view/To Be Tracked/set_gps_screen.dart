@@ -8,7 +8,6 @@ import 'package:gentech/provider/location_Provider.dart';
 import 'package:gentech/provider/profile_Provider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/utils/contact_listview.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 import 'package:provider/provider.dart';
@@ -26,10 +25,61 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
     zoom: 14.4746,
   );
 
+  String locationMessage = "Please enable location services.";
+
+  Future<void> checkLocationPermissions() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        await Geolocator.openLocationSettings();
+        serviceEnabled = await Geolocator.isLocationServiceEnabled();
+        if (!serviceEnabled) {
+          setState(() {
+            locationMessage = 'Location services are disabled.';
+          });
+          return;
+        }
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            locationMessage = 'Location permissions are denied';
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          locationMessage =
+              'Location permissions are permanently denied, we cannot request permissions.';
+        });
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      setState(() {
+        locationMessage =
+            'Current Position: ${position.latitude}, ${position.longitude}';
+      });
+    } catch (e) {
+      setState(() {
+        locationMessage = "Error: $e";
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     fetchUserProfile(context);
+    checkLocationPermissions();
+    Provider.of<LocationProvider>(context, listen: false)
+        .getUserCurrentLocation();
   }
 
   Future<void> fetchUserProfile(BuildContext context) async {

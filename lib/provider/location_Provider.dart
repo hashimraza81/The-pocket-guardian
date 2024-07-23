@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,13 +13,14 @@ class LocationProvider with ChangeNotifier {
   final List<Marker> _markers = [];
   final Completer<GoogleMapController> _completer =
       Completer<GoogleMapController>();
+  late StreamSubscription<Position> _positionStreamSubscription;
 
   Position? get currentPosition => _currentPosition;
   String? get currentAddress => _currentAddress;
   List<Marker> get markers => _markers;
   Completer<GoogleMapController> get completer => _completer;
 
-  Future<void> getUserCurrentLocation() async {
+  Future<LatLng?> getUserCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -37,35 +40,63 @@ class LocationProvider with ChangeNotifier {
             'Location permissions are permanently denied, we cannot request permissions.');
       }
 
-      _currentPosition = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      _markers.clear();
-      _markers.add(Marker(
-        markerId: const MarkerId('1'),
-        position:
-            LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-      ));
+      _positionStreamSubscription =
+          Geolocator.getPositionStream().listen((Position position) async {
+        _currentPosition = position;
+        _markers.clear();
+        _markers.add(Marker(
+          markerId: const MarkerId('1'),
+          position: LatLng(position.latitude, position.longitude),
+        ));
 
-      CameraPosition cameraPosition = CameraPosition(
-        target: LatLng(_currentPosition!.latitude, _currentPosition!.longitude),
-        zoom: 14,
-      );
+        CameraPosition cameraPosition = CameraPosition(
+          target: LatLng(position.latitude, position.longitude),
+          zoom: 14,
+        );
 
-      final GoogleMapController controller = await _completer.future;
-      controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+        final GoogleMapController controller = await _completer.future;
+        controller
+            .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
-      // Fetch the address based on the current position
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        _currentPosition!.latitude,
-        _currentPosition!.longitude,
-      );
+        // Fetch the address based on the current position
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
 
-      _currentAddress =
-          '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}';
+        _currentAddress =
+            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}';
 
-      notifyListeners();
+        // Save to Firebase
+        await saveLocationToFirestore(position);
+
+        notifyListeners();
+      });
     } catch (e) {
       print("Error: $e");
     }
+    return null;
+  }
+
+  Future<void> saveLocationToFirestore(Position position) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('trackUsers')
+          .doc(user.uid)
+          .update({
+        'live-location': {
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+          'timestamp': FieldValue.serverTimestamp(),
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _positionStreamSubscription.cancel();
+    super.dispose();
   }
 }

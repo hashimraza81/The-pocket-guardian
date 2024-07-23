@@ -5,10 +5,12 @@ import 'package:gentech/app%20notification/push_notification.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/firebase%20functions/firebase_services.dart';
+import 'package:gentech/firebase%20functions/get_device_token.dart';
 import 'package:gentech/model/contact_model.dart';
 import 'package:gentech/provider/location_Provider.dart';
 import 'package:gentech/provider/option_provider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -118,6 +120,8 @@ class _ContactListviewState extends State<ContactListview> {
                           IconButtonWithMenu(
                             phoneNumber: contact.phoneNumber,
                             email: contact.email,
+                            contacts: contact,
+                            receiverId: contact.uid,
                           ),
                         ],
                       ),
@@ -134,9 +138,16 @@ class IconButtonWithMenu extends StatelessWidget {
   final GlobalKey _key = GlobalKey();
   final String phoneNumber;
   final String email;
+  final Contact contacts;
+  final String receiverId;
 
-  IconButtonWithMenu(
-      {super.key, required this.phoneNumber, required this.email});
+  IconButtonWithMenu({
+    super.key,
+    required this.phoneNumber,
+    required this.email,
+    required this.contacts,
+    required this.receiverId,
+  });
 
   Future<void> _sendEmail(String body, String email) async {
     final encodedBody = Uri.encodeComponent(body).replaceAll('+', '%20');
@@ -147,6 +158,49 @@ class IconButtonWithMenu extends StatelessWidget {
           'subject=${Uri.encodeComponent('Emergency: Relative in Trouble')}&body=$encodedBody',
     );
     await launchUrl(emailUri);
+  }
+
+  Future<Position?> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled, return early.
+      return null;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, return early.
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, return early.
+      return null;
+    }
+
+    // When we reach here, permissions are granted, and we can fetch the location.
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<Position?> _onLocationIconTapped() async {
+    Position? position = await _getCurrentLocation();
+    if (position != null) {
+      print('Current position: ${position.latitude}, ${position.longitude}');
+      print(position);
+      return position;
+
+      // You can handle the location data here, such as updating the UI or sending it to a server.
+    } else {
+      print('Failed to get current location.');
+    }
+    return null;
   }
 
   void _showDialog(BuildContext context) {
@@ -238,18 +292,75 @@ class IconButtonWithMenu extends StatelessWidget {
                     "App notifications"
                 ? Colors.white
                 : AppColors.primary,
-            () {
-              Provider.of<OptionProvider>(context, listen: false)
-                  .setSelectedOption("App notifications");
-              print('hashum');
+            () async {
+              Position? position = await _onLocationIconTapped();
+              if (position != null) {
+                Provider.of<OptionProvider>(context, listen: false)
+                    .setSelectedOption("App notifications");
 
-              PushNotification.sendNotificationToSelectedRole(
-                  "e6m3sesTRgiHp8gb1DKJFH:APA91bHxEFfS9vvU2U7Tt4nNtckCsNZI3OEbrz6Qn-squWTESeltGnTMNwf56p1bXofPdY7053M9rDPPQZ1Iuf6EFBn3L0wXcwdb2bGoMaGPwXW2DxxZwLGmss9yrTpFWcQd3_SK7dsq",
-                  context,
-                  '123');
+                // Fetch the device token from the contact
+                String? deviceToken = await getDeviceTokenFromContact(contacts);
+
+                if (deviceToken != null) {
+                  User? currentUser = FirebaseAuth.instance.currentUser;
+                  if (currentUser != null) {
+                    String senderId = currentUser.uid;
+                    String mapsUrl =
+                        'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
+                    String body = mapsUrl;
+                    await PushNotification.sendNotificationToSelectedRole(
+                      deviceToken,
+                      context,
+                      senderId,
+                      receiverId,
+                      position.latitude,
+                      position.longitude,
+                      "Notification",
+                      body,
+                    );
+                  } else {
+                    print('Failed to retrieve current user ID.');
+                  }
+                } else {
+                  print('Failed to retrieve device token.');
+                }
+              }
+
               Navigator.pop(context);
             },
           ),
+          // () async {
+          //   var latalng = _onLocationIconTapped();
+          //   Provider.of<OptionProvider>(context, listen: false)
+          //       .setSelectedOption("App notifications");
+
+          //   // final locationProvider = Provider.of<LocationProvider>(context);
+          //   // print("hashim ${locationProvider.currentAddress}");
+
+          //   // Fetch the device token from the contact
+          //   String? deviceToken = await getDeviceTokenFromContact(contacts);
+
+          //   if (deviceToken != null) {
+          //     // Use the device token to send a notification
+          //     // PushNotification.sendNotificationToSelectedRole(
+          //     //     deviceToken, context, 'Notification title or message');
+
+          //     // PushNotification.sendNotificationToSelectedRole(
+          //     //   deviceToken,
+          //     //   context,
+          //     //   'senderId',
+          //     //   'receiverId',
+          //     //   'SenderName is requesting you acsess his/her location ',
+          //     //   latalng,
+          //     // );
+
+          //     PushNotification.sendNotificationToSelectedRole(deviceToken, context, 'senderId', 'receiverId', lat, lng, "title", 'body',)
+          //   } else {
+          //     print('Failed to retrieve device token.');
+          //   }
+
+          //   Navigator.pop(context);
+          // },
         ),
       ],
     );

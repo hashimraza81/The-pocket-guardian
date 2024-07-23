@@ -206,7 +206,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   24.ph,
-                  const PinLocation(),
+                  PlacesSearchScreen(),
                   24.ph,
                   CustomText(
                     text: 'Contacts',

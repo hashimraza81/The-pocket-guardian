@@ -83,6 +83,10 @@ class _AddContactState extends State<AddContact> {
       String collectionToSaveIn =
           userRole == 'Track' ? 'trackUsers' : 'trackingUsers';
 
+      String selectedUserRole = selectedUser!['role'];
+      String selectedUserCollection =
+          selectedUserRole == 'Track' ? 'trackUsers' : 'trackingUsers';
+
       String newDocId = FirebaseFirestore.instance
           .collection(collectionToSaveIn)
           .doc(loggedInUser.uid)
@@ -101,7 +105,7 @@ class _AddContactState extends State<AddContact> {
         'email': emailController.text,
         'uid': selectedUser!['uid'],
         'reference': FirebaseFirestore.instance
-            .collection(collectionToSaveIn)
+            .collection(selectedUserCollection)
             .doc(selectedUser!['uid'])
             .path,
       });

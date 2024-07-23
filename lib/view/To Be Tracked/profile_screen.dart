@@ -118,10 +118,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
 
       // Upload new image to Firebase Storage and get the download URL
-      Reference storageRef = FirebaseStorage.instance
-          .ref()
-          .child('profileImages')
-          .child('$userId.png');
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('images').child('$userId.png');
       await storageRef.putFile(imageFile);
       String newImageUrl = await storageRef.getDownloadURL();
 

@@ -40,18 +40,23 @@ class _AddNumberState extends State<AddNumber> {
                 children: [
                   Row(
                     children: [
-                      Container(
-                        height: 44.0.h,
-                        width: 44.0.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.circular(
-                            10.0.r,
+                      InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          height: 44.0.h,
+                          width: 44.0.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(
+                              10.0.r,
+                            ),
                           ),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back_ios,
-                          color: AppColors.primary,
+                          child: const Icon(
+                            Icons.arrow_back_ios,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                       85.0.pw,

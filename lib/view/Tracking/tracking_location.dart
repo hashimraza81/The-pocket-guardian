@@ -4,9 +4,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
+import 'package:gentech/provider/location_Provider.dart';
 import 'package:gentech/routes/routes_names.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
 import 'package:gentech/utils/reused_button.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 class TrackingLocation extends StatefulWidget {
   const TrackingLocation({super.key});
@@ -16,10 +19,15 @@ class TrackingLocation extends StatefulWidget {
 }
 
 class _TrackingLocationState extends State<TrackingLocation> {
+  static const CameraPosition kGooglePlex = CameraPosition(
+    target: LatLng(33.516842, 73.086052),
+    zoom: 14.4746,
+  );
   bool _showOverlayImage = false;
 
   @override
   Widget build(BuildContext context) {
+    final locationProvider = Provider.of<LocationProvider>(context);
     return SafeArea(
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -58,9 +66,17 @@ class _TrackingLocationState extends State<TrackingLocation> {
           children: [
             // Map Placeholder
             Positioned.fill(
-              child: Image.asset(
-                AppImages.map, // Use a placeholder image or a map widget here
-                fit: BoxFit.cover,
+              child: GoogleMap(
+                initialCameraPosition: kGooglePlex,
+                mapType: MapType.normal,
+                myLocationEnabled: true,
+                compassEnabled: false,
+                onMapCreated: (GoogleMapController controller) {
+                  if (!locationProvider.completer.isCompleted) {
+                    locationProvider.completer.complete(controller);
+                  }
+                },
+                markers: Set<Marker>.of(locationProvider.markers),
               ),
             ),
             // GPS Location Pin
