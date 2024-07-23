@@ -11,19 +11,325 @@ import 'package:gentech/utils/reused_button.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
+// class TrackingLocation extends StatefulWidget {
+//   const TrackingLocation({super.key});
+
+//   @override
+//   _TrackingLocationState createState() => _TrackingLocationState();
+// }
+
+// class _TrackingLocationState extends State<TrackingLocation> {
+//   static const CameraPosition kGooglePlex = CameraPosition(
+//     target: LatLng(33.516842, 73.086052),
+//     zoom: 14.4746,
+//   );
+//   bool _showOverlayImage = false;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final locationProvider = Provider.of<LocationProvider>(context);
+//     return SafeArea(
+//       child: Scaffold(
+//         extendBodyBehindAppBar: true,
+//         appBar: AppBar(
+//             backgroundColor: Colors.transparent,
+//             automaticallyImplyLeading: false,
+//             elevation: 0,
+//             centerTitle: true,
+//             leading: InkWell(
+//               onTap: () {
+//                 Navigator.pop(context);
+//               },
+//               child: Container(
+//                 height: 44.0.h,
+//                 width: 44.0.w,
+//                 decoration: BoxDecoration(
+//                   color: AppColors.white,
+//                   borderRadius: BorderRadius.circular(
+//                     10.0.r,
+//                   ),
+//                 ),
+//                 child: const Icon(
+//                   Icons.arrow_back_ios,
+//                   color: AppColors.primary,
+//                 ),
+//               ),
+//             ),
+//             title: CustomText(
+//               text: 'location',
+//               size: 24.0.sp,
+//               color: AppColors.primary,
+//               fontWeight: FontWeight.w700,
+//               familyFont: 'Montserrat',
+//             )),
+//         body: Stack(
+//           children: [
+//             // Map Placeholder
+//             Positioned.fill(
+//               child: GoogleMap(
+//                 initialCameraPosition: kGooglePlex,
+//                 mapType: MapType.normal,
+//                 myLocationEnabled: true,
+//                 compassEnabled: false,
+//                 onMapCreated: (GoogleMapController controller) {
+//                   if (!locationProvider.completer.isCompleted) {
+//                     locationProvider.completer.complete(controller);
+//                   }
+//                 },
+//                 markers: Set<Marker>.of(locationProvider.markers),
+//               ),
+//             ),
+//             // GPS Location Pin
+//             const Center(
+//               child: Column(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   Icon(
+//                     Icons.location_on,
+//                     size: 50,
+//                     color: AppColors.secondary,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//             // User Information and Buttons
+//             Padding(
+//               padding: EdgeInsets.only(
+//                 top: 560.h,
+//               ),
+//               child: Container(
+//                 width: double.infinity,
+//                 height: 60.h,
+//                 decoration: BoxDecoration(
+//                   color: AppColors.secondary,
+//                   borderRadius: BorderRadius.circular(20.0.r),
+//                 ),
+//                 child: Padding(
+//                   padding: EdgeInsets.symmetric(
+//                       horizontal: 28.0.w, vertical: 10.0.h),
+//                   child: CustomText(
+//                     text:
+//                         'Click here to allow location access for better safety',
+//                     size: 12.sp,
+//                     fontWeight: FontWeight.w500,
+//                     familyFont: 'Montserrat',
+//                     color: AppColors.white,
+//                   ),
+//                 ),
+//               ),
+//             ),
+//             Positioned(
+//               bottom: 0,
+//               left: 0,
+//               right: 0,
+//               child: Stack(
+//                 children: [
+//                   Container(
+//                     padding: const EdgeInsets.all(16),
+//                     decoration: BoxDecoration(
+//                       color: Colors.white,
+//                       borderRadius: BorderRadius.vertical(
+//                         top: Radius.circular(20.0.r),
+//                       ),
+//                       boxShadow: [
+//                         BoxShadow(
+//                           color: Colors.black26,
+//                           blurRadius: 10.0.r,
+//                           offset: const Offset(0, -2),
+//                         ),
+//                       ],
+//                     ),
+//                     child: Column(
+//                       mainAxisSize: MainAxisSize.min,
+//                       children: [
+//                         Row(
+//                           children: [
+//                             CircleAvatar(
+//                               // User profile image
+//                               radius: 30.0.r,
+//                               child: ClipOval(
+//                                 child: Image.asset(AppImages.profile),
+//                               ),
+//                             ),
+//                             10.0.pw,
+//                             Expanded(
+//                               child: Column(
+//                                 crossAxisAlignment: CrossAxisAlignment.start,
+//                                 children: [
+//                                   Text(
+//                                     'MON 24, MAY • 10:00 AM',
+//                                     style: TextStyle(
+//                                       fontSize: 12.0.sp,
+//                                       fontWeight: FontWeight.w500,
+//                                       fontFamily: 'Montserrat',
+//                                       color: AppColors.grey3,
+//                                     ),
+//                                   ),
+//                                   Text(
+//                                     '6391 Elgin St. Celina, Island Delaware 10299',
+//                                     style: TextStyle(
+//                                       fontSize: 16.0.sp,
+//                                       fontWeight: FontWeight.w600,
+//                                       fontFamily: 'Montserrat',
+//                                       color: AppColors.primary,
+//                                     ),
+//                                   ),
+//                                   Text(
+//                                     '21.5km away',
+//                                     style: TextStyle(
+//                                       fontSize: 8.0.sp,
+//                                       fontWeight: FontWeight.w400,
+//                                       fontFamily: 'Montserrat',
+//                                       color: const Color(0xFF000000),
+//                                     ),
+//                                   ),
+//                                 ],
+//                               ),
+//                             ),
+//                             InkWell(
+//                               onTap: () {},
+//                               child: SvgPicture.asset(
+//                                 AppImages.refresh,
+//                                 color: AppColors.secondary,
+//                                 height: 30.h,
+//                                 width: 30.w,
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                         10.0.ph,
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                           children: [
+//                             ElevatedButton(
+//                               style: ButtonStyle(
+//                                 backgroundColor:
+//                                     WidgetStateProperty.all(AppColors.white),
+//                                 side: WidgetStateProperty.all(
+//                                   const BorderSide(
+//                                       color: AppColors.grey4, width: 1),
+//                                 ),
+//                               ),
+//                               onPressed: () {
+//                                 Navigator.pushNamed(
+//                                     context, RoutesName.livetracking);
+//                               },
+//                               child: Row(
+//                                 mainAxisSize: MainAxisSize.min,
+//                                 children: [
+//                                   SvgPicture.asset(AppImages.watch),
+//                                   8.0.pw,
+//                                   Text(
+//                                     'Watch',
+//                                     style: TextStyle(
+//                                       fontSize: 14.0.sp,
+//                                       fontWeight: FontWeight.w600,
+//                                       fontFamily: 'Montserrat',
+//                                       color: AppColors.primary,
+//                                     ),
+//                                   ),
+//                                 ],
+//                               ),
+//                             ),
+//                             ElevatedButton(
+//                               onPressed: () {
+//                                 setState(() {
+//                                   _showOverlayImage = !_showOverlayImage;
+//                                 });
+//                               },
+//                               style: ElevatedButton.styleFrom(
+//                                 backgroundColor: AppColors.red,
+//                               ),
+//                               child: Row(
+//                                 children: [
+//                                   SvgPicture.asset(AppImages.contact),
+//                                   8.0.pw,
+//                                   Text(
+//                                     'Contact',
+//                                     style: TextStyle(
+//                                       fontSize: 14.0.sp,
+//                                       fontWeight: FontWeight.w600,
+//                                       fontFamily: 'Montserrat',
+//                                       color: AppColors.white,
+//                                     ),
+//                                   ),
+//                                 ],
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                   if (_showOverlayImage)
+//                     Positioned.fill(
+//                       child: Container(
+//                         width: double.infinity,
+//                         color: AppColors.white,
+//                         child: Padding(
+//                           padding: const EdgeInsets.all(10.0),
+//                           child: Column(
+//                             children: [
+//                               ReusedButton(
+//                                 text: 'Message',
+//                                 onPressed: () {
+//                                   Navigator.pop(context);
+//                                 },
+//                                 colorbg: AppColors.secondary.withOpacity(0.2),
+//                                 bordercolor: AppColors.secondary,
+//                                 colortext: AppColors.primary,
+//                               ),
+//                               15.0.ph,
+//                               ReusedButton(
+//                                 text: 'Call',
+//                                 onPressed: () {
+//                                   Navigator.pop(context);
+//                                 },
+//                                 colorbg: AppColors.secondary.withOpacity(0.2),
+//                                 bordercolor: AppColors.secondary,
+//                                 colortext: AppColors.primary,
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ),
+//                     ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 class TrackingLocation extends StatefulWidget {
-  const TrackingLocation({super.key});
+  final double? lat;
+  final double ?lng;
+
+  const TrackingLocation({
+    Key? key,
+     this.lat,
+     this.lng,
+  }) : super(key: key);
 
   @override
   _TrackingLocationState createState() => _TrackingLocationState();
 }
 
 class _TrackingLocationState extends State<TrackingLocation> {
-  static const CameraPosition kGooglePlex = CameraPosition(
-    target: LatLng(33.516842, 73.086052),
-    zoom: 14.4746,
-  );
+  late CameraPosition _initialCameraPosition;
   bool _showOverlayImage = false;
+
+  @override
+  void initState() {
+    print(widget.lat!);
+    super.initState();
+    _initialCameraPosition = CameraPosition(
+      target: LatLng(widget.lat!, widget.lng!),
+      zoom: 14.4746,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +347,11 @@ class _TrackingLocationState extends State<TrackingLocation> {
                 Navigator.pop(context);
               },
               child: Container(
-                height: 44.0.h,
-                width: 44.0.w,
+                height: 44.0,
+                width: 44.0,
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(
-                    10.0.r,
-                  ),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: const Icon(
                   Icons.arrow_back_ios,
@@ -57,7 +361,7 @@ class _TrackingLocationState extends State<TrackingLocation> {
             ),
             title: CustomText(
               text: 'location',
-              size: 24.0.sp,
+              size: 24.0,
               color: AppColors.primary,
               fontWeight: FontWeight.w700,
               familyFont: 'Montserrat',
@@ -67,7 +371,7 @@ class _TrackingLocationState extends State<TrackingLocation> {
             // Map Placeholder
             Positioned.fill(
               child: GoogleMap(
-                initialCameraPosition: kGooglePlex,
+                initialCameraPosition: _initialCameraPosition,
                 mapType: MapType.normal,
                 myLocationEnabled: true,
                 compassEnabled: false,
@@ -94,23 +398,20 @@ class _TrackingLocationState extends State<TrackingLocation> {
             ),
             // User Information and Buttons
             Padding(
-              padding: EdgeInsets.only(
-                top: 560.h,
-              ),
+              padding: EdgeInsets.only(top: 560),
               child: Container(
                 width: double.infinity,
-                height: 60.h,
+                height: 60,
                 decoration: BoxDecoration(
                   color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(20.0.r),
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 28.0.w, vertical: 10.0.h),
+                  padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 10.0),
                   child: CustomText(
                     text:
                         'Click here to allow location access for better safety',
-                    size: 12.sp,
+                    size: 12,
                     fontWeight: FontWeight.w500,
                     familyFont: 'Montserrat',
                     color: AppColors.white,
@@ -129,12 +430,12 @@ class _TrackingLocationState extends State<TrackingLocation> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20.0.r),
+                        top: Radius.circular(20.0),
                       ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black26,
-                          blurRadius: 10.0.r,
+                          blurRadius: 10.0,
                           offset: const Offset(0, -2),
                         ),
                       ],
@@ -146,12 +447,12 @@ class _TrackingLocationState extends State<TrackingLocation> {
                           children: [
                             CircleAvatar(
                               // User profile image
-                              radius: 30.0.r,
+                              radius: 30.0,
                               child: ClipOval(
                                 child: Image.asset(AppImages.profile),
                               ),
                             ),
-                            10.0.pw,
+                            SizedBox(width: 10.0),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +460,7 @@ class _TrackingLocationState extends State<TrackingLocation> {
                                   Text(
                                     'MON 24, MAY • 10:00 AM',
                                     style: TextStyle(
-                                      fontSize: 12.0.sp,
+                                      fontSize: 12.0,
                                       fontWeight: FontWeight.w500,
                                       fontFamily: 'Montserrat',
                                       color: AppColors.grey3,
@@ -168,7 +469,7 @@ class _TrackingLocationState extends State<TrackingLocation> {
                                   Text(
                                     '6391 Elgin St. Celina, Island Delaware 10299',
                                     style: TextStyle(
-                                      fontSize: 16.0.sp,
+                                      fontSize: 16.0,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Montserrat',
                                       color: AppColors.primary,
@@ -177,7 +478,7 @@ class _TrackingLocationState extends State<TrackingLocation> {
                                   Text(
                                     '21.5km away',
                                     style: TextStyle(
-                                      fontSize: 8.0.sp,
+                                      fontSize: 8.0,
                                       fontWeight: FontWeight.w400,
                                       fontFamily: 'Montserrat',
                                       color: const Color(0xFF000000),
@@ -191,21 +492,21 @@ class _TrackingLocationState extends State<TrackingLocation> {
                               child: SvgPicture.asset(
                                 AppImages.refresh,
                                 color: AppColors.secondary,
-                                height: 30.h,
-                                width: 30.w,
+                                height: 30,
+                                width: 30,
                               ),
                             ),
                           ],
                         ),
-                        10.0.ph,
+                        SizedBox(height: 10.0),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             ElevatedButton(
                               style: ButtonStyle(
                                 backgroundColor:
-                                    WidgetStateProperty.all(AppColors.white),
-                                side: WidgetStateProperty.all(
+                                    MaterialStateProperty.all(AppColors.white),
+                                side: MaterialStateProperty.all(
                                   const BorderSide(
                                       color: AppColors.grey4, width: 1),
                                 ),
@@ -218,11 +519,11 @@ class _TrackingLocationState extends State<TrackingLocation> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   SvgPicture.asset(AppImages.watch),
-                                  8.0.pw,
+                                  SizedBox(width: 8.0),
                                   Text(
                                     'Watch',
                                     style: TextStyle(
-                                      fontSize: 14.0.sp,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Montserrat',
                                       color: AppColors.primary,
@@ -243,11 +544,11 @@ class _TrackingLocationState extends State<TrackingLocation> {
                               child: Row(
                                 children: [
                                   SvgPicture.asset(AppImages.contact),
-                                  8.0.pw,
+                                  SizedBox(width: 8.0),
                                   Text(
                                     'Contact',
                                     style: TextStyle(
-                                      fontSize: 14.0.sp,
+                                      fontSize: 14.0,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Montserrat',
                                       color: AppColors.white,
@@ -279,7 +580,7 @@ class _TrackingLocationState extends State<TrackingLocation> {
                                 bordercolor: AppColors.secondary,
                                 colortext: AppColors.primary,
                               ),
-                              15.0.ph,
+                              SizedBox(height: 15.0),
                               ReusedButton(
                                 text: 'Call',
                                 onPressed: () {
@@ -303,3 +604,4 @@ class _TrackingLocationState extends State<TrackingLocation> {
     );
   }
 }
+

@@ -12,6 +12,7 @@ import 'package:gentech/routes/routes_names.dart';
 import 'package:gentech/utils/custom_bottom_bar.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
 import 'package:gentech/view/Tracking/tracking_bottom_bar.dart';
+import 'package:gentech/view/Tracking/tracking_location.dart';
 import 'package:provider/provider.dart';
 
 // class NotificationScreen extends StatefulWidget {
@@ -268,7 +269,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
     User? currentUser = FirebaseAuth.instance.currentUser;
     final userChoice = Provider.of<UserChoiceProvider>(context).userChoice;
 
-
     return ChangeNotifierProvider(
       create: (context) => NavigationProvider(),
       child: SafeArea(
@@ -323,12 +323,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           child: StreamBuilder<QuerySnapshot>(
                             stream: FirebaseFirestore.instance
                                 .collection('pushNotifications')
-                                .where('receiverId', isEqualTo: currentUser)
+                                .where('receiverId', isEqualTo: currentUser.uid)
                                 .snapshots(),
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
-                                return Center(
-                                    child: CircularProgressIndicator());
+                                return Center(child: CircularProgressIndicator());
                               }
                               final notifications = snapshot.data!.docs;
                               return ListView.builder(
@@ -337,18 +336,25 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   final notification = notifications[index];
                                   return FutureBuilder<DocumentSnapshot>(
                                     future: FirebaseFirestore.instance
-                                        .collection('users')
+                                        .collection('trackUsers')
                                         .doc(notification['senderId'])
                                         .get(),
                                     builder: (context, senderSnapshot) {
                                       if (!senderSnapshot.hasData) {
-                                        return Center(
-                                            child:
-                                                CircularProgressIndicator());
+                                        return Center(child: CircularProgressIndicator());
+                                      }
+                                      if (!senderSnapshot.data!.exists) {
+                                        // Handle the case where the sender document does not exist
+                                        return Center(child: Text("Sender data not found"));
                                       }
                                       final sender = senderSnapshot.data!;
-                                      final name = sender['name'];
-                                      final imageUrl = sender['imageUrl'];
+                                      final name = sender.get('name') ?? 'Unknown Sender';
+                                      final imageUrl = sender.get('imageUrl') as String?;
+
+                                      // Debugging prints
+                                      print('Sender Data: ${sender.data()}');
+                                      print('Sender Name: $name');
+                                      print('Sender Image URL: $imageUrl');
 
                                       return RequestItem(
                                         name: name,
@@ -358,14 +364,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         showButtons: true,
                                         color: const Color(0xFFC3E1F3),
                                         onAccept: () {
-                                          Navigator.pushNamed(
-                                            context,
-                                            RoutesName.trackinglocation,
-                                            arguments: {
-                                              'lat': notification['senderlocation']['lat'],
-                                              'lng': notification['senderlocation']['lng'],
-                                            },
-                                          );
+                                         Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (context) => TrackingLocation(
+      lat: notification['senderlocation']['lat'],
+      lng: notification['senderlocation']['lng'],
+    ),
+  ),
+);
+
                                         },
                                       );
                                     },
@@ -379,9 +387,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
               ),
             ),
           ),
-         bottomNavigationBar: userChoice == 'Track'
+          bottomNavigationBar: userChoice == 'Track'
               ? const CustomBottomBar()
-              : const TrackingBottomBar()
+              : const TrackingBottomBar(),
         ),
       ),
     );
@@ -393,7 +401,7 @@ class RequestItem extends StatelessWidget {
   final String name;
   final String actionText;
   final String actionItem;
-  final String imageUrl;
+  final String? imageUrl;
   final bool showButtons;
   final Color? color;
   final VoidCallback? onAccept;
@@ -403,7 +411,7 @@ class RequestItem extends StatelessWidget {
     required this.name,
     required this.actionText,
     this.actionItem = '',
-    required this.imageUrl,
+    this.imageUrl,
     this.showButtons = false,
     this.color,
     this.onAccept,
@@ -422,7 +430,9 @@ class RequestItem extends StatelessWidget {
               CircleAvatar(
                 radius: 35.0,
                 child: ClipOval(
-                  child: Image.network(imageUrl),
+                  child: imageUrl != null
+                      ? Image.network(imageUrl!)
+                      : Icon(Icons.person, size: 35.0),
                 ),
               ),
               SizedBox(width: 20.0),
@@ -479,8 +489,7 @@ class RequestItem extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  AppColors.secondary),
+                              backgroundColor: MaterialStateProperty.all(AppColors.secondary),
                             ),
                             onPressed: onAccept,
                             child: Text(
@@ -496,8 +505,7 @@ class RequestItem extends StatelessWidget {
                           SizedBox(width: 10.0),
                           OutlinedButton(
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(
-                                  AppColors.white),
+                              backgroundColor: MaterialStateProperty.all(AppColors.white),
                             ),
                             onPressed: () {},
                             child: Text(
