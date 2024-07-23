@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gentech/routes/routes_names.dart';
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:http/http.dart' as http;
 
@@ -55,65 +56,129 @@ class PushNotification {
     }
   }
 
-  static sendNotificationToSelectedRole(
-    String deviceToken,
-    BuildContext context,
-    String senderId,
-    String receiverId,
-    double lat,
-    double lng,
-    String title,
-    String body,
-  ) async {
-    final firestore = FirebaseFirestore.instance;
-    await firestore.collection('pushNotifications').add({
-      'senderId': senderId,
-      'receiverId': receiverId,
-      'senderlocation': {
-        'lat': lat,
-        'lng': lng,
+  // static sendNotificationToSelectedRole(
+
+  //   String deviceToken,
+  //   BuildContext context,
+  //   String senderId,
+  //   String receiverId,
+  //   double lat,
+  //   double lng,
+  //   String title,
+  //   String body,
+  // ) async {
+  //   final firestore = FirebaseFirestore.instance;
+  //   await firestore.collection('pushNotifications').add({
+  //     'senderId': senderId,
+  //     'receiverId': receiverId,
+  //     'senderlocation': {
+  //       'lat': lat,
+  //       'lng': lng,
+  //     },
+  //     'timestamp': FieldValue.serverTimestamp(),
+  //     'title': title,
+  //     'messagebody': body,
+  //   });
+
+  //   final String serviceKey = await getAccessToken();
+  //   String endpointFirebaseCloudMessaging =
+  //       'https://fcm.googleapis.com/v1/projects/gentech-4aa53/messages:send';
+
+  //   final String mapsUrl =
+  //       'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+  //   final Map<String, dynamic> message = {
+  //     'message': {
+  //       'token': deviceToken,
+  //       'notification': {
+  //         'title': title,
+  //         'body': body,
+  //       },
+  //       'data': {
+  //         //'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+  //         'lat': lat.toString(),
+  //         'lng': lng.toString(),
+  //         'mapsUrl': mapsUrl,
+  //       }
+  //     }
+  //   };
+
+  //   final http.Response response = await http.post(
+  //     Uri.parse(endpointFirebaseCloudMessaging),
+  //     headers: <String, String>{
+  //       'Content-Type': 'application/json',
+  //       'Authorization': 'Bearer $serviceKey'
+  //     },
+  //     body: jsonEncode(message),
+  //   );
+
+  //   if (response.statusCode == 200) {
+  //     print('Notification Sent Successfully');
+  //   } else {
+  //     print('Failed to send FCM message: ${response.statusCode}');
+  //     print('Response body: ${response.body}');
+  //   }
+  // }
+
+static sendNotificationToSelectedRole(
+  String deviceToken,
+  BuildContext context,
+  String senderId,
+  String receiverId,
+  double lat,
+  double lng,
+  String title,
+  String body,
+) async {
+  final firestore = FirebaseFirestore.instance;
+  await firestore.collection('pushNotifications').add({
+    'senderId': senderId,
+    'receiverId': receiverId,
+    'senderlocation': {
+      'lat': lat,
+      'lng': lng,
+    },
+    'timestamp': FieldValue.serverTimestamp(),
+    'title': title,
+    'messagebody': body,
+  });
+
+  final String serviceKey = await getAccessToken();
+  String endpointFirebaseCloudMessaging =
+      'https://fcm.googleapis.com/v1/projects/gentech-4aa53/messages:send';
+
+  final String mapsUrl =
+      'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+  final Map<String, dynamic> message = {
+    'message': {
+      'token': deviceToken,
+      'notification': {
+        'title': title,
+        'body': body,
       },
-      'timestamp': FieldValue.serverTimestamp(),
-      'title': title,
-      'messagebody': body,
-    });
-
-    final String serviceKey = await getAccessToken();
-    String endpointFirebaseCloudMessaging =
-        'https://fcm.googleapis.com/v1/projects/gentech-4aa53/messages:send';
-
-    final String mapsUrl =
-        'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
-    final Map<String, dynamic> message = {
-      'message': {
-        'token': deviceToken,
-        'notification': {
-          'title': title,
-          'body': body,
-        },
-        'data': {
-          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-          'lat': lat.toString(),
-          'lng': lng.toString(),
-          'mapsUrl': mapsUrl,
-        }
-      }
-    };
-
-    final http.Response response = await http.post(
-      Uri.parse(endpointFirebaseCloudMessaging),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $serviceKey'
+      'data': {
+        'lat': lat.toString(),
+        'lng': lng.toString(),
+        'mapsUrl': mapsUrl,
+        'route': RoutesName.notification, // Add this line to specify the route
       },
-      body: jsonEncode(message),
-    );
+    },
+  };
 
-    if (response.statusCode == 200) {
-      print('Notification Sent Successfully');
-    } else {
-      print('Failed to send FCM message: ${response.statusCode}');
-      print('Response body: ${response.body}');
-    }
+  final http.Response response = await http.post(
+    Uri.parse(endpointFirebaseCloudMessaging),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $serviceKey',
+    },
+    body: jsonEncode(message),
+  );
+
+  if (response.statusCode == 200) {
+    print('Notification Sent Successfully');
+  } else {
+    print('Failed to send FCM message: ${response.statusCode}');
+    print('Response body: ${response.body}');
   }
+}
+
 }

@@ -168,64 +168,71 @@ class _StartState extends State<Start> {
     });
   }
 
-  void _initializeFirebaseMessaging() async {
-    await Firebase.initializeApp();
-    _firebaseMessaging = FirebaseMessaging.instance;
+ void _initializeFirebaseMessaging() async {
+  await Firebase.initializeApp();
+  if (!mounted) return; // Check if the state is still mounted
 
-    // Request permission for iOS
-    NotificationSettings settings =
-        await _firebaseMessaging.requestPermission();
+  _firebaseMessaging = FirebaseMessaging.instance;
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('User granted permission');
-    } else if (settings.authorizationStatus ==
-        AuthorizationStatus.provisional) {
-      print('User granted provisional permission');
-    } else {
-      print('User declined or has not accepted permission');
-    }
+  // Request permission for iOS
+  NotificationSettings settings = await _firebaseMessaging.requestPermission();
 
-    // Listen for token refresh
-    _firebaseMessaging.onTokenRefresh.listen((newToken) {
-      print("New Token: $newToken");
-      // Save the new token in your backend
-    });
-
-    // Handle foreground messages
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Received message in foreground: ${message.messageId}');
-      _showMessage(message);
-    });
-
-    // Handle background messages
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('Message clicked!');
-      _handleMessage(message);
-    });
-
-    // Handle initial message when the app is opened from a terminated state
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) {
-      if (message != null) {
-        _handleMessage(message);
-      }
-    });
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    print('User granted permission');
+  } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
+    print('User granted provisional permission');
+  } else {
+    print('User declined or has not accepted permission');
   }
+
+  // Listen for token refresh
+  _firebaseMessaging.onTokenRefresh.listen((newToken) {
+    if (!mounted) return; // Check if the state is still mounted
+    print("New Token: $newToken");
+    // Save the new token in your backend
+  });
+
+  // Handle foreground messages
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (!mounted) return; // Check if the state is still mounted
+    print('Received message in foreground: ${message.messageId}');
+    _showMessage(message);
+  });
+
+  // Handle background and terminated messages
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    if (!mounted) return; // Check if the state is still mounted
+    print('Message clicked!');
+    _handleMessage(message);
+  });
+
+  FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    if (!mounted) return; // Check if the state is still mounted
+    if (message != null) {
+      _handleMessage(message);
+    }
+  });
+}
+
 
   void _handleMessage(RemoteMessage message) {
-    final String? mapsUrl = message.data['mapsUrl'];
-    final String? route = message.data['route'];
+  if (!mounted) return;
 
-    if (mapsUrl != null) {
-      _launchURL(mapsUrl);
-    } else if (route != null) {
-      Navigator.pushNamed(context, route);
-    } else {
-      // Navigate to a default screen if no route is specified
-      Navigator.pushNamed(context, RoutesName.notification);
-    }
+  final String? mapsUrl = message.data['mapsUrl'];
+  final String? route = message.data['route'];
+
+  // if (mapsUrl != null) {
+  //   _launchURL(mapsUrl);
+  // } else
+   if (route != null && route == RoutesName.notification) {
+    Navigator.pushNamed(context, RoutesName.notification);
+  } else if (route != null) {
+    Navigator.pushNamed(context, route);
+  } else {
+    // Navigate to a default screen if no route is specified
+    Navigator.pushNamed(context, RoutesName.notification);
   }
+}
 
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
@@ -283,3 +290,4 @@ class _StartState extends State<Start> {
     );
   }
 }
+
