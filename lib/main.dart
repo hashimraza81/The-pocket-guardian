@@ -12,6 +12,7 @@ import 'package:gentech/provider/option_provider.dart';
 import 'package:gentech/provider/places_provider.dart';
 import 'package:gentech/provider/profile_Provider.dart';
 import 'package:gentech/provider/tracking_bottom_bar_Provider.dart';
+import 'package:gentech/provider/userProvider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/routes/routes.dart';
 import 'package:gentech/routes/routes_names.dart';
@@ -27,6 +28,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => TrackingBottomBarProvider()),
         ChangeNotifierProvider(create: (_) => UserChoiceProvider()),
@@ -48,7 +50,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+ 
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
