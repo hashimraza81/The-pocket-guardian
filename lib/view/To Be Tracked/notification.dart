@@ -327,7 +327,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 .snapshots(),
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
-                                return Center(child: CircularProgressIndicator());
+                                return Center(
+                                    child: CircularProgressIndicator());
                               }
                               final notifications = snapshot.data!.docs;
                               return ListView.builder(
@@ -341,15 +342,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         .get(),
                                     builder: (context, senderSnapshot) {
                                       if (!senderSnapshot.hasData) {
-                                        return Center(child: CircularProgressIndicator());
+                                        return Center(
+                                            child: CircularProgressIndicator());
                                       }
                                       if (!senderSnapshot.data!.exists) {
                                         // Handle the case where the sender document does not exist
-                                        return Center(child: Text("Sender data not found"));
+                                        return Center(
+                                            child:
+                                                Text("Sender data not found"));
                                       }
                                       final sender = senderSnapshot.data!;
-                                      final name = sender.get('name') ?? 'Unknown Sender';
-                                      final imageUrl = sender.get('imageUrl') as String?;
+                                      final name = sender.get('name') ??
+                                          'Unknown Sender';
+                                      final imageUrl =
+                                          sender.get('imageUrl') as String?;
 
                                       // Debugging prints
                                       print('Sender Data: ${sender.data()}');
@@ -364,16 +370,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         showButtons: true,
                                         color: const Color(0xFFC3E1F3),
                                         onAccept: () {
-                                         Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => TrackingLocation(
-      lat: notification['senderlocation']['lat'],
-      lng: notification['senderlocation']['lng'],
-    ),
-  ),
-);
-
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TrackingLocation(
+                                                lat: notification[
+                                                    'senderlocation']['lat'],
+                                                lng: notification[
+                                                    'senderlocation']['lng'],
+                                                imageUrl: sender.get('imageUrl')
+                                                    as String?,
+                                              ),
+                                            ),
+                                          );
                                         },
                                       );
                                     },
@@ -489,7 +499,8 @@ class RequestItem extends StatelessWidget {
                         children: [
                           ElevatedButton(
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(AppColors.secondary),
+                              backgroundColor: MaterialStateProperty.all(
+                                  AppColors.secondary),
                             ),
                             onPressed: onAccept,
                             child: Text(
@@ -505,7 +516,8 @@ class RequestItem extends StatelessWidget {
                           SizedBox(width: 10.0),
                           OutlinedButton(
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(AppColors.white),
+                              backgroundColor:
+                                  MaterialStateProperty.all(AppColors.white),
                             ),
                             onPressed: () {},
                             child: Text(
