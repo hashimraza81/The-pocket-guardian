@@ -8,9 +8,10 @@ class LocationService {
   Future<String> getAddressFromLatLng(double lat, double lng) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
-      if (placemarks != null && placemarks.isNotEmpty) {
+      if (placemarks.isNotEmpty) {
         Placemark placemark = placemarks[0];
-        String address = "${placemark.street}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}";
+        String address =
+            "${placemark.street}, ${placemark.locality}, ${placemark.postalCode}, ${placemark.country}";
         return address;
       } else {
         return "No address available";
@@ -23,12 +24,17 @@ class LocationService {
 
   // Other utility functions can be added here in the future
   // Example function to calculate distance between two coordinates
-  double calculateDistance(double startLat, double startLng, double endLat, double endLng) {
-     double p = 0.017453292519943295; // Math.PI / 180
-   double c = 0.5 - cos((endLat - startLat) * p) / 2 + cos(startLat * p) * cos(endLat * p) * (1 - cos((endLng - startLng) * p)) / 2;
+  double calculateDistance(
+      double startLat, double startLng, double endLat, double endLng) {
+    double p = 0.017453292519943295; // Math.PI / 180
+    double c = 0.5 -
+        cos((endLat - startLat) * p) / 2 +
+        cos(startLat * p) *
+            cos(endLat * p) *
+            (1 - cos((endLng - startLng) * p)) /
+            2;
     return 12742 * asin(sqrt(c)); // 2 * R; R = 6371 km
   }
-
 
   // Function to get the current location
   Future<Position> getCurrentLocation() async {
@@ -53,10 +59,12 @@ class LocationService {
 
     if (permission == LocationPermission.deniedForever) {
       // Permissions are denied forever, handle appropriately.
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
     }
 
     // When we reach here, permissions are granted and we can fetch the current location.
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 }
