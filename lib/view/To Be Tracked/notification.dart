@@ -1,14 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gentech/const/app_colors.dart';
-import 'package:gentech/const/app_images.dart';
-import 'package:gentech/extension/sizebox_extension.dart';
 import 'package:gentech/provider/navigationProvider.dart';
-import 'package:gentech/provider/userProvider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
-import 'package:gentech/routes/routes_names.dart';
 import 'package:gentech/utils/custom_bottom_bar.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
 import 'package:gentech/view/Tracking/tracking_bottom_bar.dart';
@@ -279,7 +274,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: Padding(
-              padding: EdgeInsets.symmetric(
+              padding: const EdgeInsets.symmetric(
                 vertical: 25.0,
                 horizontal: 15.0,
               ),
@@ -306,7 +301,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 90.0),
+                      const SizedBox(width: 90.0),
                       CustomText(
                         text: 'Notification',
                         size: 24.0,
@@ -316,9 +311,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       )
                     ],
                   ),
-                  SizedBox(height: 40.0),
+                  const SizedBox(height: 40.0),
                   currentUser == null
-                      ? Center(child: Text("No user data available"))
+                      ? const Center(child: Text("No user data available"))
                       : Expanded(
                           child: StreamBuilder<QuerySnapshot>(
                             stream: FirebaseFirestore.instance
@@ -327,7 +322,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 .snapshots(),
                             builder: (context, snapshot) {
                               if (!snapshot.hasData) {
-                                return Center(child: CircularProgressIndicator());
+                                return const Center(
+                                    child: CircularProgressIndicator());
                               }
                               final notifications = snapshot.data!.docs;
                               return ListView.builder(
@@ -341,15 +337,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         .get(),
                                     builder: (context, senderSnapshot) {
                                       if (!senderSnapshot.hasData) {
-                                        return Center(child: CircularProgressIndicator());
+                                        return const Center(
+                                            child: CircularProgressIndicator());
                                       }
                                       if (!senderSnapshot.data!.exists) {
                                         // Handle the case where the sender document does not exist
-                                        return Center(child: Text("Sender data not found"));
+                                        return const Center(
+                                            child:
+                                                Text("Sender data not found"));
                                       }
                                       final sender = senderSnapshot.data!;
-                                      final name = sender.get('name') ?? 'Unknown Sender';
-                                      final imageUrl = sender.get('imageUrl') as String?;
+                                      final name = sender.get('name') ??
+                                          'Unknown Sender';
+                                      final imageUrl =
+                                          sender.get('imageUrl') as String?;
 
                                       // Debugging prints
                                       print('Sender Data: ${sender.data()}');
@@ -364,16 +365,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         showButtons: true,
                                         color: const Color(0xFFC3E1F3),
                                         onAccept: () {
-                                         Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (context) => TrackingLocation(
-      lat: notification['senderlocation']['lat'],
-      lng: notification['senderlocation']['lng'],
-    ),
-  ),
-);
-
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TrackingLocation(
+                                                lat: notification[
+                                                    'senderlocation']['lat'],
+                                                lng: notification[
+                                                    'senderlocation']['lng'],
+                                              ),
+                                            ),
+                                          );
                                         },
                                       );
                                     },
@@ -406,7 +409,7 @@ class RequestItem extends StatelessWidget {
   final Color? color;
   final VoidCallback? onAccept;
 
-  RequestItem({
+  const RequestItem({
     super.key,
     required this.name,
     required this.actionText,
@@ -420,7 +423,7 @@ class RequestItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
         color: color,
         child: Padding(
@@ -432,10 +435,10 @@ class RequestItem extends StatelessWidget {
                 child: ClipOval(
                   child: imageUrl != null
                       ? Image.network(imageUrl!)
-                      : Icon(Icons.person, size: 35.0),
+                      : const Icon(Icons.person, size: 35.0),
                 ),
               ),
-              SizedBox(width: 20.0),
+              const SizedBox(width: 20.0),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,7 +448,7 @@ class RequestItem extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: name,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontFamily: 'Montserrat',
                               fontSize: 12.0,
@@ -454,7 +457,7 @@ class RequestItem extends StatelessWidget {
                           ),
                           TextSpan(
                             text: ' $actionText ',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w400,
                               fontFamily: 'Montserrat',
                               fontSize: 12.0,
@@ -463,7 +466,7 @@ class RequestItem extends StatelessWidget {
                           ),
                           TextSpan(
                             text: actionItem,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontFamily: 'Montserrat',
                               fontSize: 12.0,
@@ -473,8 +476,8 @@ class RequestItem extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: 5.0),
-                    Text(
+                    const SizedBox(height: 5.0),
+                    const Text(
                       '4h ago • North School, L2 Street',
                       style: TextStyle(
                         color: AppColors.grey3,
@@ -484,15 +487,16 @@ class RequestItem extends StatelessWidget {
                       ),
                     ),
                     if (showButtons) ...[
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                       Row(
                         children: [
                           ElevatedButton(
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(AppColors.secondary),
+                              backgroundColor:
+                                  WidgetStateProperty.all(AppColors.secondary),
                             ),
                             onPressed: onAccept,
-                            child: Text(
+                            child: const Text(
                               'Accept',
                               style: TextStyle(
                                 color: AppColors.white,
@@ -502,13 +506,14 @@ class RequestItem extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(width: 10.0),
+                          const SizedBox(width: 10.0),
                           OutlinedButton(
                             style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all(AppColors.white),
+                              backgroundColor:
+                                  WidgetStateProperty.all(AppColors.white),
                             ),
                             onPressed: () {},
-                            child: Text(
+                            child: const Text(
                               'Decline',
                               style: TextStyle(
                                 color: AppColors.primary,
