@@ -378,7 +378,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                                     as String?,
                                                 phonenumber:
                                                     sender.get('phonenumber'),
-                                                source: 'notification',
+                                               fromNotificationRoute: true,
                                               ),
                                             ),
                                           );

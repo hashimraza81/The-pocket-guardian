@@ -507,11 +507,10 @@ class _MainScreenState extends State<MainScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const TrackingLocation(
-                                lat: null, // or pass null or 0 if not needed
-                                lng: null, // or pass null or 0 if not needed
+                               
                                 imageUrl: null,
                                 phonenumber: null,
-                                source: 'homeTracking',
+                               fromNotificationRoute: false,
                               ),
                             ),
                           );
