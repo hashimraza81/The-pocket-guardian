@@ -15,6 +15,7 @@ import 'package:gentech/utils/pin_Location.dart';
 import 'package:gentech/utils/reused_button.dart';
 import 'package:gentech/view/To%20Be%20Tracked/set_gps_screen.dart';
 import 'package:gentech/view/To%20Be%20Tracked/side_drawer.dart';
+import 'package:gentech/view/Tracking/tracking_location.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
@@ -182,10 +183,16 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       child: InkWell(
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const SetGpsScreen()));
+                         Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TrackingLocation(
+                                              fromNotificationRoute: false,
+                                                imageUrl: userProfileProvider.profileImageUrl                                            as String?,
+                                              ),
+                                            ),
+                                          );
                         },
                         child: Row(
                           children: [

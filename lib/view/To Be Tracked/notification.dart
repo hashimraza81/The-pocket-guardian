@@ -381,6 +381,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                                     'senderlocation']['lng'],
                                                 imageUrl: sender.get('imageUrl')
                                                     as String?,
+                                              fromNotificationRoute: true,
                                               ),
                                             ),
                                           );
