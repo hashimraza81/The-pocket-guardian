@@ -59,7 +59,6 @@ class Routes {
         return MaterialPageRoute(builder: (_) => const UnlockPhone());
       case RoutesName.setreminder:
         return MaterialPageRoute(builder: (_) => const SetReminder());
-
       case RoutesName.trackinglocation:
         return MaterialPageRoute(builder: (_) => const TrackingLocation());
       case RoutesName.livetracking:
@@ -77,6 +76,59 @@ class Routes {
             ),
           );
         });
+    }
+  }
+
+  static Widget getRouteWidget(String routeName) {
+    switch (routeName) {
+      case RoutesName.start:
+        return const Start();
+      case RoutesName.splashscreen:
+        return const Splashscreen();
+      case RoutesName.loginOrSignup:
+        return const LoginOrSignup();
+      case RoutesName.signin:
+        return const SignIn();
+      case RoutesName.signup:
+        return const SignUp();
+      case RoutesName.forgotPassword:
+        return const ForgotPassword();
+      case RoutesName.verification:
+        return const VerificationScreen();
+      case RoutesName.resetPassword:
+        return const ResetPassword();
+      case RoutesName.home:
+        return const Home();
+      case RoutesName.addNumber:
+        return const AddNumber();
+      case RoutesName.addcontact:
+        return const AddContact();
+      case RoutesName.profile:
+        return const ProfileScreen();
+      case RoutesName.notification:
+        return const NotificationScreen();
+      case RoutesName.alert:
+        return const AlertScreen();
+      case RoutesName.hometracking:
+        return const HomeTracking();
+      case RoutesName.unlockphone:
+        return const UnlockPhone();
+      case RoutesName.setreminder:
+        return const SetReminder();
+      case RoutesName.trackinglocation:
+        return const TrackingLocation();
+      case RoutesName.livetracking:
+        return const LiveTracking();
+      case RoutesName.trackingAlert:
+        return const TrackingAlert();
+      case RoutesName.trackingaddnumber:
+        return const TrackingAddNumber();
+      default:
+        return Scaffold(
+          body: Center(
+            child: Text('No route defined for $routeName'),
+          ),
+        );
     }
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
+import 'package:gentech/provider/places_provider.dart';
 import 'package:gentech/provider/profile_Provider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/routes/routes_names.dart';
@@ -53,6 +54,12 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     fetchUserProfile(context);
+    print('hellel');
+    final placesProvider =
+        Provider.of<LocationPlacesProvider>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      placesProvider.startTrackingLocation(context);
+    });
   }
 
   Future<void> fetchUserProfile(BuildContext context) async {
@@ -66,6 +73,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final userProfileProvider = Provider.of<UserProfileProvider>(context);
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.sccafold,
@@ -206,7 +214,7 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   24.ph,
-                  PlacesSearchScreen(),
+                  const PlacesSearchScreen(),
                   24.ph,
                   CustomText(
                     text: 'Contacts',

@@ -22,7 +22,7 @@ class _PlacesSearchScreenState extends State<PlacesSearchScreen> {
     // Fetch the initial location for the user
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final placesProvider =
-          Provider.of<PlacesProvider>(context, listen: false);
+          Provider.of<LocationPlacesProvider>(context, listen: false);
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
         placesProvider.setUserId(user.uid);
@@ -35,7 +35,7 @@ class _PlacesSearchScreenState extends State<PlacesSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final placesProvider = Provider.of<PlacesProvider>(context);
+    final placesProvider = Provider.of<LocationPlacesProvider>(context);
 
     return Container(
       child: Padding(

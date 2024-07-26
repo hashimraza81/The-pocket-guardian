@@ -4,7 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
-import 'package:gentech/provider/location_Provider.dart';
+import 'package:gentech/provider/places_provider.dart';
 import 'package:gentech/provider/profile_Provider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/utils/contact_listview.dart';
@@ -78,7 +78,7 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
     super.initState();
     fetchUserProfile(context);
     checkLocationPermissions();
-    Provider.of<LocationProvider>(context, listen: false)
+    Provider.of<LocationPlacesProvider>(context, listen: false)
         .getUserCurrentLocation();
   }
 
@@ -91,7 +91,7 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locationProvider = Provider.of<LocationProvider>(context);
+    final locationProvider = Provider.of<LocationPlacesProvider>(context);
     final userProfileProvider = Provider.of<UserProfileProvider>(context);
     String formattedDate =
         DateFormat('EEE d, MMM • hh:mm a').format(DateTime.now());

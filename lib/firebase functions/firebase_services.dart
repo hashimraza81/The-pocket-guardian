@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/routes/routes_names.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FirebaseFunctions {
   static Future<void> signUpFunction(
@@ -51,12 +52,18 @@ class FirebaseFunctions {
         'role': userRole,
         'deviceToken': deviceToken,
       });
+
+      // Save user role in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userChoice', userRole);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.green,
           content: Text('Sign Up Successful'),
         ),
       );
+
       // Navigate based on user role
       Navigator.pushNamedAndRemoveUntil(
           context, RoutesName.signin, (route) => false);
@@ -93,6 +100,11 @@ class FirebaseFunctions {
       if (trackUserDoc.exists) {
         // User found in trackUsers collection
         await _updateDeviceTokenIfNeeded(trackUserDoc, currentDeviceToken);
+
+        // Save user role in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userChoice', 'Track');
+
         Navigator.pushReplacementNamed(context, RoutesName.home);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -111,6 +123,11 @@ class FirebaseFunctions {
       if (trackingUserDoc.exists) {
         // User found in trackingUsers collection
         await _updateDeviceTokenIfNeeded(trackingUserDoc, currentDeviceToken);
+
+        // Save user role in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userChoice', 'Tracking');
+
         Navigator.pushReplacementNamed(context, RoutesName.hometracking);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User signed in successfully')),

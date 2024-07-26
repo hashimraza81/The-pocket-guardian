@@ -1,135 +1,95 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gentech/app%20notification/push_notification.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
-import 'package:gentech/firebase%20functions/firebase_services.dart';
 import 'package:gentech/firebase%20functions/get_device_token.dart';
 import 'package:gentech/model/contact_model.dart';
-import 'package:gentech/provider/location_Provider.dart';
+import 'package:gentech/provider/contact_provider.dart';
 import 'package:gentech/provider/option_provider.dart';
-import 'package:gentech/provider/user_choice_provider.dart';
+import 'package:gentech/provider/places_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ContactListview extends StatefulWidget {
+class ContactListview extends StatelessWidget {
   const ContactListview({super.key});
 
   @override
-  State<ContactListview> createState() => _ContactListviewState();
-}
-
-class _ContactListviewState extends State<ContactListview> {
-  final FirebaseFunctions _firebaseFunctions = FirebaseFunctions();
-  List<Contact> _contacts = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchContacts();
-  }
-
-  Future<void> _fetchContacts() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      String userRole =
-          Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
-      String collectionToSearch =
-          userRole == 'Track' ? 'trackUsers' : 'trackingUsers';
-
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection(collectionToSearch)
-          .doc(user.uid)
-          .collection('contacts')
-          .get();
-
-      List<Contact> contacts = snapshot.docs.map((doc) {
-        return Contact.fromFirestore(doc);
-      }).toList();
-
-      setState(() {
-        _contacts = contacts;
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          color: AppColors.sccafold,
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _contacts.length,
-                  itemBuilder: (context, index) {
-                    final contact = _contacts[index];
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.secondary.withOpacity(0.09),
-                        borderRadius: BorderRadius.circular(10.0),
+    return ChangeNotifierProvider(
+      create: (_) => ContactProvider()..fetchContacts(context),
+      child: Consumer<ContactProvider>(
+        builder: (context, contactProvider, _) {
+          if (contactProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else {
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: contactProvider.contacts.length,
+              itemBuilder: (context, index) {
+                final contact = contactProvider.contacts[index];
+                return Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withOpacity(0.09),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: contact.imageUrl.isNotEmpty
+                            ? NetworkImage(contact.imageUrl)
+                            : const AssetImage(AppImages.profile)
+                                as ImageProvider,
+                        radius: 20.0,
                       ),
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
+                      const SizedBox(width: 16.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            backgroundImage: contact.imageUrl.isNotEmpty
-                                ? NetworkImage(contact.imageUrl)
-                                : const AssetImage(AppImages.profile)
-                                    as ImageProvider,
-                            radius: 20.0,
+                          Text(
+                            contact.name,
+                            style: const TextStyle(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Montserrat',
+                              color: AppColors.primary,
+                            ),
                           ),
-                          const SizedBox(width: 16.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Row(
                             children: [
+                              const Icon(Icons.phone,
+                                  size: 16.0, color: AppColors.primary),
+                              const SizedBox(width: 8.0),
                               Text(
-                                contact.name,
+                                contact.phoneNumber,
                                 style: const TextStyle(
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w400,
                                   fontFamily: 'Montserrat',
                                   color: AppColors.primary,
                                 ),
                               ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.phone,
-                                      size: 16.0, color: AppColors.primary),
-                                  const SizedBox(width: 8.0),
-                                  Text(
-                                    contact.phoneNumber,
-                                    style: const TextStyle(
-                                      fontSize: 12.0,
-                                      fontWeight: FontWeight.w400,
-                                      fontFamily: 'Montserrat',
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ],
-                          ),
-                          const Spacer(),
-                          IconButtonWithMenu(
-                            phoneNumber: contact.phoneNumber,
-                            email: contact.email,
-                            contacts: contact,
-                            receiverId: contact.uid,
                           ),
                         ],
                       ),
-                    );
-                  },
-                ),
-        ),
-      ],
+                      const Spacer(),
+                      IconButtonWithMenu(
+                        phoneNumber: contact.phoneNumber,
+                        email: contact.email,
+                        contacts: contact,
+                        receiverId: contact.uid,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
     );
   }
 }
@@ -236,7 +196,7 @@ class IconButtonWithMenu extends StatelessWidget {
                   .setSelectedOption("Email");
 
               final locationProvider =
-                  Provider.of<LocationProvider>(context, listen: false);
+                  Provider.of<LocationPlacesProvider>(context, listen: false);
               await locationProvider.getUserCurrentLocation();
 
               String mapsUrl =
