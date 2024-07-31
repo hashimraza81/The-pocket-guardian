@@ -70,6 +70,7 @@ dependencies:
   flutter_typeahead: ^4.0.0
   location: ^7.0.0
   
+  
 
 
 dev_dependencies:

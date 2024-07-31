@@ -40,4 +40,14 @@ class UserProfileProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> clearUserProfileCache() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('username');
+    await prefs.remove('profileImageUrl');
+
+    _username = '';
+    _profileImageUrl = '';
+    notifyListeners();
+  }
 }

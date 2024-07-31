@@ -32,7 +32,8 @@ class _AddContactState extends State<AddContact> {
 
     final result = await FirebaseFirestore.instance
         .collection(collectionToSearch)
-        .where('name', isEqualTo: query)
+        .where('name', isGreaterThanOrEqualTo: query)
+        .where('name', isLessThan: '${query.toLowerCase()}z')
         .get();
 
     setState(() {
@@ -83,6 +84,23 @@ class _AddContactState extends State<AddContact> {
       String collectionToSaveIn =
           userRole == 'Track' ? 'trackUsers' : 'trackingUsers';
 
+      var existingContacts = await FirebaseFirestore.instance
+          .collection(collectionToSaveIn)
+          .doc(loggedInUser.uid)
+          .collection('contacts')
+          .where('uid', isEqualTo: selectedUser!['uid'])
+          .get();
+
+      if (existingContacts.docs.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Colors.red,
+            content: Text('This contact is already added.'),
+          ),
+        );
+        return;
+      }
+
       String selectedUserRole = selectedUser!['role'];
       String selectedUserCollection =
           selectedUserRole == 'Track' ? 'trackUsers' : 'trackingUsers';
@@ -104,10 +122,19 @@ class _AddContactState extends State<AddContact> {
         'phonenumber': phoneNumberController.text,
         'email': emailController.text,
         'uid': selectedUser!['uid'],
+        'imageUrl': selectedUser!['imageUrl'],
         'reference': FirebaseFirestore.instance
             .collection(selectedUserCollection)
             .doc(selectedUser!['uid'])
             .path,
+      });
+      setState(() {
+        nameController.clear();
+        phoneNumberController.clear();
+        emailController.clear();
+        searchController.clear();
+        selectedUser = null;
+        searchResult = [];
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -206,6 +233,7 @@ class _AddContactState extends State<AddContact> {
                   18.ph,
                   const Divider(color: AppColors.grey5),
                   TextField(
+                    controller: searchController,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: AppColors.white,

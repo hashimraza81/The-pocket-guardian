@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gentech/const/app_colors.dart';
@@ -14,10 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../Location Service Functions/location_services.dart';
 
-
-
-
-
 class TrackingLocation extends StatefulWidget {
   final double? lat;
   final double? lng;
@@ -25,15 +19,14 @@ class TrackingLocation extends StatefulWidget {
   final bool? fromNotificationRoute;
   final String? phonenumber;
 
-
   const TrackingLocation({
-    Key? key,
+    super.key,
     this.lat,
     this.lng,
     this.imageUrl,
     this.fromNotificationRoute,
     this.phonenumber,
-  }) : super(key: key);
+  });
 
   @override
   _TrackingLocationState createState() => _TrackingLocationState();
@@ -54,10 +47,11 @@ class _TrackingLocationState extends State<TrackingLocation> {
       position = await locationService.getCurrentLocation();
       String address = widget.fromNotificationRoute == true
           ? await locationService.getAddressFromLatLng(widget.lat!, widget.lng!)
-          : await locationService.getAddressFromLatLng(position!.latitude, position!.longitude);
+          : await locationService.getAddressFromLatLng(
+              position!.latitude, position!.longitude);
       if (widget.fromNotificationRoute == true) {
         double distance = locationService.calculateDistance(
-          position!.latitude, position!.longitude, widget.lat!, widget.lng!);
+            position!.latitude, position!.longitude, widget.lat!, widget.lng!);
         setState(() {
           _distance = distance;
         });
@@ -65,17 +59,17 @@ class _TrackingLocationState extends State<TrackingLocation> {
       setState(() {
         _address = address;
         _initialCameraPosition = widget.fromNotificationRoute == true
-          ? CameraPosition(
-              target: LatLng(widget.lat!, widget.lng!),
-              zoom: 14.4746,
-            )
-          : CameraPosition(
-              target: LatLng(position!.latitude, position!.longitude),
-              zoom: 14.4746,
-            );
+            ? CameraPosition(
+                target: LatLng(widget.lat!, widget.lng!),
+                zoom: 14.4746,
+              )
+            : CameraPosition(
+                target: LatLng(position!.latitude, position!.longitude),
+                zoom: 14.4746,
+              );
         _markers = {
           Marker(
-            markerId: MarkerId('currentLocation'),
+            markerId: const MarkerId('currentLocation'),
             position: widget.fromNotificationRoute == true
                 ? LatLng(widget.lat!, widget.lng!)
                 : LatLng(position!.latitude, position!.longitude),
@@ -99,7 +93,8 @@ class _TrackingLocationState extends State<TrackingLocation> {
     super.initState();
     _fetchAddress();
   }
-Future<void> _launchGoogleMaps(double destLat, double destLng) async {
+
+  Future<void> _launchGoogleMaps(double destLat, double destLng) async {
     if (position != null) {
       final String googleMapsUrl =
           'https://www.google.com/maps/dir/?api=1&origin=${position!.latitude},${position!.longitude}&destination=$destLat,$destLng';
@@ -113,6 +108,7 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
       print('Current position is not available');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final locationProvider = Provider.of<LocationPlacesProvider>(context);
@@ -154,7 +150,7 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
             // Map Placeholder
             Positioned.fill(
               child: _initialCameraPosition == null
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : GoogleMap(
                       initialCameraPosition: _initialCameraPosition!,
                       mapType: MapType.normal,
@@ -182,27 +178,29 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
               ),
             ),
             // User Information and Buttons
-            Padding(
-              padding: EdgeInsets.only(top: 560),
-              child: Container(
-                width: double.infinity,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 28.0, vertical: 10.0),
-                  child: CustomText(
-                    text: 'Click here to allow location access for better safety',
-                    size: 12,
-                    fontWeight: FontWeight.w500,
-                    familyFont: 'Montserrat',
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.only(top: 560),
+            //   child: Container(
+            //     width: double.infinity,
+            //     height: 60,
+            //     decoration: BoxDecoration(
+            //       color: AppColors.secondary,
+            //       borderRadius: BorderRadius.circular(20.0),
+            //     ),
+            //     child: Padding(
+            //       padding: const EdgeInsets.symmetric(
+            //           horizontal: 28.0, vertical: 10.0),
+            //       child: CustomText(
+            //         text:
+            //             'Click here to allow location access for better safety',
+            //         size: 12,
+            //         fontWeight: FontWeight.w500,
+            //         familyFont: 'Montserrat',
+            //         color: AppColors.white,
+            //       ),
+            //     ),
+            //   ),
+            // ),
             Positioned(
               bottom: 0,
               left: 0,
@@ -211,7 +209,7 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(20.0),
@@ -220,7 +218,7 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                         BoxShadow(
                           color: Colors.black26,
                           blurRadius: 10.0,
-                          offset: const Offset(0, -2),
+                          offset: Offset(0, -2),
                         ),
                       ],
                     ),
@@ -235,15 +233,15 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                                   ? NetworkImage(widget.imageUrl!)
                                   : null,
                               child: widget.imageUrl == null
-                                  ? Icon(Icons.person, size: 30.0)
+                                  ? const Icon(Icons.person, size: 30.0)
                                   : null,
                             ),
-                            SizedBox(width: 10.0),
+                            const SizedBox(width: 10.0),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
                                     'MON 24, MAY • 10:00 AM',
                                     style: TextStyle(
                                       fontSize: 12.0,
@@ -254,7 +252,7 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                                   ),
                                   Text(
                                     _address,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 16.0,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Montserrat',
@@ -264,11 +262,11 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                                   if (_distance != null)
                                     Text(
                                       "Distance: ${_distance!.toStringAsFixed(2)} km",
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 8.0,
                                         fontWeight: FontWeight.w400,
                                         fontFamily: 'Montserrat',
-                                        color: const Color(0xFF000000),
+                                        color: Color(0xFF000000),
                                       ),
                                     ),
                                 ],
@@ -285,16 +283,18 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                             ),
                           ],
                         ),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                         if (widget.fromNotificationRoute == true)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               ElevatedButton(
                                 style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(AppColors.white),
-                                  side: MaterialStateProperty.all(
-                                    const BorderSide(color: AppColors.grey4, width: 1),
+                                  backgroundColor:
+                                      WidgetStateProperty.all(AppColors.white),
+                                  side: WidgetStateProperty.all(
+                                    const BorderSide(
+                                        color: AppColors.grey4, width: 1),
                                   ),
                                 ),
                                 onPressed: () {
@@ -309,7 +309,7 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                                   //     ),
                                   //   ),
                                   // );
-                                  
+
                                   _launchGoogleMaps(
                                     widget.lat!,
                                     widget.lng!,
@@ -319,8 +319,8 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     SvgPicture.asset(AppImages.watch),
-                                    SizedBox(width: 8.0),
-                                    Text(
+                                    const SizedBox(width: 8.0),
+                                    const Text(
                                       'Watch',
                                       style: TextStyle(
                                         fontSize: 14.0,
@@ -344,8 +344,8 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                                 child: Row(
                                   children: [
                                     SvgPicture.asset(AppImages.contact),
-                                    SizedBox(width: 8.0),
-                                    Text(
+                                    const SizedBox(width: 8.0),
+                                    const Text(
                                       'Contact',
                                       style: TextStyle(
                                         fontSize: 14.0,
@@ -364,51 +364,49 @@ Future<void> _launchGoogleMaps(double destLat, double destLng) async {
                   ),
                   if (_showOverlayImage)
                     Positioned.fill(
-                        child: Container(
-                          width: double.infinity,
-                          color: AppColors.white,
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              children: [
-                                ReusedButton(
-                                  text: 'Message',
-                                  onPressed: () async {
-                                    await launchUrl(
-                                      Uri(
-                                        scheme: 'sms',
-                                        path: widget.phonenumber,
-                                      ),
-                                    );
-                                    Navigator.pop(context);
-                                  },
-                                  colorbg: AppColors.secondary.withOpacity(0.2),
-                                  bordercolor: AppColors.secondary,
-                                  colortext: AppColors.primary,
-                                ),
-                                const SizedBox(height: 15.0),
-                                ReusedButton(
-                                  text: 'Call',
-                                  onPressed: () async {
-                                    await launchUrl(
-                                      Uri(
-                                        scheme: 'tel',
-                                        path: widget.phonenumber,
-                                      ),
-                                    );
-                                    Navigator.pop(context);
-                                  },
-                                  colorbg: AppColors.secondary.withOpacity(0.2),
-                                  bordercolor: AppColors.secondary,
-                                  colortext: AppColors.primary,
-                                ),
-                              ],
-                            ),
+                      child: Container(
+                        width: double.infinity,
+                        color: AppColors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              ReusedButton(
+                                text: 'Message',
+                                onPressed: () async {
+                                  await launchUrl(
+                                    Uri(
+                                      scheme: 'sms',
+                                      path: widget.phonenumber,
+                                    ),
+                                  );
+                                  Navigator.pop(context);
+                                },
+                                colorbg: AppColors.secondary.withOpacity(0.2),
+                                bordercolor: AppColors.secondary,
+                                colortext: AppColors.primary,
+                              ),
+                              const SizedBox(height: 15.0),
+                              ReusedButton(
+                                text: 'Call',
+                                onPressed: () async {
+                                  await launchUrl(
+                                    Uri(
+                                      scheme: 'tel',
+                                      path: widget.phonenumber,
+                                    ),
+                                  );
+                                  Navigator.pop(context);
+                                },
+                                colorbg: AppColors.secondary.withOpacity(0.2),
+                                bordercolor: AppColors.secondary,
+                                colortext: AppColors.primary,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-
-
+                    ),
                 ],
               ),
             ),

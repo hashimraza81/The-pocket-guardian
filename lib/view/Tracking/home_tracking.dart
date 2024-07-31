@@ -321,6 +321,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
@@ -490,33 +491,76 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
                   24.ph,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ReusedContainer(
-                        image: AppImages.unlockphone,
-                        text: 'Unlock Phone',
-                        onTap: () => Navigator.pushNamed(
-                            context, RoutesName.unlockphone),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //   children: [
+                  //     ReusedContainer(
+                  //       image: AppImages.unlockphone,
+                  //       text: 'Unlock Phone',
+                  //       onTap: () => Navigator.pushNamed(
+                  //           context, RoutesName.unlockphone),
+                  //     ),
+                  //     ReusedContainer(
+                  //       image: AppImages.gpslocation,
+                  //       text: 'GPS location',
+                  //       onTap: () {
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //             builder: (context) => const TrackingLocation(
+
+                  //               imageUrl: null,
+                  //               phonenumber: null,
+                  //              fromNotificationRoute: false,
+                  //             ),
+                  //           ),
+                  //         );
+                  //       },
+                  //     ),
+                  //   ],
+                  // ),
+                  Container(
+                    width: 360.w,
+                    height: 75.h,
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(5.r),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 19.0.h,
+                        horizontal: 15.w,
                       ),
-                      ReusedContainer(
-                        image: AppImages.gpslocation,
-                        text: 'GPS location',
+                      child: InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const TrackingLocation(
-                               
                                 imageUrl: null,
                                 phonenumber: null,
-                               fromNotificationRoute: false,
+                                fromNotificationRoute: false,
                               ),
                             ),
                           );
                         },
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              AppImages.gps,
+                            ),
+                            12.pw,
+                            CustomText(
+                              text: 'GPS location',
+                              size: 14.sp,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                              familyFont: 'Montserrat',
+                            )
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
                   24.ph,
                   CustomText(
@@ -548,54 +592,54 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// ignore: must_be_immutable
-class ReusedContainer extends StatelessWidget {
-  final String image;
-  final String text;
-  final VoidCallback onTap;
+// // ignore: must_be_immutable
+// class ReusedContainer extends StatelessWidget {
+//   final String image;
+//   final String text;
+//   final VoidCallback onTap;
 
-  const ReusedContainer({
-    super.key,
-    required this.image,
-    required this.text,
-    required this.onTap,
-  });
+//   const ReusedContainer({
+//     super.key,
+//     required this.image,
+//     required this.text,
+//     required this.onTap,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10.0.r),
-          color: AppColors.white,
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: 16.0.h,
-            horizontal: 20.0.w,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(image),
-              11.0.ph,
-              Text(
-                text,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
-                  fontFamily: 'Montserrat',
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return InkWell(
+//       onTap: onTap,
+//       child: Container(
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10.0.r),
+//           color: AppColors.white,
+//         ),
+//         child: Padding(
+//           padding: EdgeInsets.symmetric(
+//             vertical: 16.0.h,
+//             horizontal: 20.0.w,
+//           ),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.center,
+//             children: [
+//               Image.asset(image),
+//               11.0.ph,
+//               Text(
+//                 text,
+//                 style: TextStyle(
+//                   fontSize: 14.sp,
+//                   fontWeight: FontWeight.w600,
+//                   color: AppColors.primary,
+//                   fontFamily: 'Montserrat',
+//                 ),
+//               )
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 
 

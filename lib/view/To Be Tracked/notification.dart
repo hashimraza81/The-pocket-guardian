@@ -8,6 +8,7 @@ import 'package:gentech/utils/custom_bottom_bar.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
 import 'package:gentech/view/Tracking/tracking_bottom_bar.dart';
 import 'package:gentech/view/Tracking/tracking_location.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 // class NotificationScreen extends StatefulWidget {
@@ -363,6 +364,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         actionItem: 'Accept',
                                         imageUrl: imageUrl,
                                         showButtons: true,
+                                        timestamp: notification['timestamp'],
                                         color: const Color(0xFFC3E1F3),
                                         onAccept: () {
                                           Navigator.push(
@@ -378,10 +380,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                                     as String?,
                                                 phonenumber:
                                                     sender.get('phonenumber'),
-                                               fromNotificationRoute: true,
+                                                fromNotificationRoute: true,
                                               ),
                                             ),
                                           );
+                                          // Delete the notification after navigating
+                                          FirebaseFirestore.instance
+                                              .collection('pushNotifications')
+                                              .doc(notification.id)
+                                              .delete();
+                                        },
+                                        onDecline: () {
+                                          // Delete the notification after navigating
+                                          FirebaseFirestore.instance
+                                              .collection('pushNotifications')
+                                              .doc(notification.id)
+                                              .delete();
                                         },
                                       );
                                     },
@@ -404,15 +418,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 }
 
-// Modified RequestItem to include onAccept callback
 class RequestItem extends StatelessWidget {
   final String name;
   final String actionText;
   final String actionItem;
   final String? imageUrl;
   final bool showButtons;
+  final Timestamp timestamp;
   final Color? color;
   final VoidCallback? onAccept;
+  final VoidCallback? onDecline;
 
   const RequestItem({
     super.key,
@@ -421,12 +436,17 @@ class RequestItem extends StatelessWidget {
     this.actionItem = '',
     this.imageUrl,
     this.showButtons = false,
+    required this.timestamp,
     this.color,
     this.onAccept,
+    this.onDecline,
   });
 
   @override
   Widget build(BuildContext context) {
+    String formattedTimestamp =
+        DateFormat('h:mm a • MMM d, yyyy').format(timestamp.toDate());
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
@@ -482,9 +502,9 @@ class RequestItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 5.0),
-                    const Text(
-                      '4h ago • North School, L2 Street',
-                      style: TextStyle(
+                    Text(
+                      formattedTimestamp,
+                      style: const TextStyle(
                         color: AppColors.grey3,
                         fontSize: 12.0,
                         fontFamily: 'Montserrat',
@@ -517,7 +537,7 @@ class RequestItem extends StatelessWidget {
                               backgroundColor:
                                   WidgetStateProperty.all(AppColors.white),
                             ),
-                            onPressed: () {},
+                            onPressed: onDecline,
                             child: const Text(
                               'Decline',
                               style: TextStyle(

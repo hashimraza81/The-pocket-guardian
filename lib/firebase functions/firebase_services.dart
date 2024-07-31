@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:gentech/provider/profile_Provider.dart';
 import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/routes/routes_names.dart';
 import 'package:provider/provider.dart';
@@ -35,6 +36,9 @@ class FirebaseFunctions {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
+      // Send email verification
+      await userCredential.user!.sendEmailVerification();
+
       String userRole =
           Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
 
@@ -51,6 +55,7 @@ class FirebaseFunctions {
         'imageUrl': imageUrl,
         'role': userRole,
         'deviceToken': deviceToken,
+        'isEmailVerified': false, // Store email verification status
       });
 
       // Save user role in SharedPreferences
@@ -60,11 +65,11 @@ class FirebaseFunctions {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.green,
-          content: Text('Sign Up Successful'),
+          content: Text('Sign Up Successful. Verification email sent.'),
         ),
       );
 
-      // Navigate based on user role
+      // Navigate to sign-in screen
       Navigator.pushNamedAndRemoveUntil(
           context, RoutesName.signin, (route) => false);
     } on FirebaseAuthException catch (ex) {
@@ -87,6 +92,13 @@ class FirebaseFunctions {
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+
+      // Check if the email is verified
+      // if (!userCredential.user!.emailVerified) {
+      //   customAlertBox(context, 'Please verify your email before signing in.');
+      //   await FirebaseAuth.instance.signOut(); // Sign out the user
+      //   return;
+      // }
 
       // Obtain the current device token
       String? currentDeviceToken = await FirebaseMessaging.instance.getToken();
@@ -179,14 +191,39 @@ class FirebaseFunctions {
   }
 
   static void logoutFunction(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushNamedAndRemoveUntil(
-        context, RoutesName.signin, (route) => false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+    try {
+      // Sign out from Firebase
+      await FirebaseAuth.instance.signOut();
+
+      // Clear cached contacts
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('contacts');
+
+      // Clear user profile cache
+      Provider.of<UserProfileProvider>(context, listen: false)
+          .clearUserProfileCache();
+
+      // Navigate to the sign-in screen and remove all previous routes
+      Navigator.pushNamedAndRemoveUntil(
+          context, RoutesName.signin, (route) => false);
+
+      // Show a snackbar message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
           backgroundColor: Colors.green,
-          content: Text('User signed Out successfully')),
-    );
+          content: Text('User signed out successfully'),
+        ),
+      );
+    } catch (e) {
+      // Handle logout error
+      print('Error logging out: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Error signing out. Please try again.'),
+        ),
+      );
+    }
   }
 
   static customAlertBox(BuildContext context, String text) {

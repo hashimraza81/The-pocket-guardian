@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,26 +12,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ContactProvider with ChangeNotifier {
   List<Contact> _contacts = [];
   bool _isLoading = true;
+  StreamSubscription? _subscription;
 
   List<Contact> get contacts => _contacts;
   bool get isLoading => _isLoading;
 
   ContactProvider() {
-    _loadContactsFromCache();
+    loadContactsFromCache();
   }
 
-  Future<void> _loadContactsFromCache() async {
+  Future<void> loadContactsFromCache() async {
+    _isLoading = true; // Ensure loading state is true initially
+    notifyListeners();
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? contactsJson = prefs.getString('contacts');
     if (contactsJson != null) {
       List<dynamic> contactsList = jsonDecode(contactsJson);
       _contacts = contactsList.map((data) => Contact.fromJson(data)).toList();
-      _isLoading = false;
-      notifyListeners();
+      print('Contacts loaded from cache: $_contacts');
+    } else {
+      print('No contacts found in cache');
     }
+    _isLoading = false;
+    notifyListeners();
   }
 
-  Future<void> fetchContacts(BuildContext context) async {
+  Future<void> subscribeToContacts(BuildContext context) async {
+    _isLoading = true;
+    notifyListeners();
+
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       String userRole =
@@ -38,24 +49,37 @@ class ContactProvider with ChangeNotifier {
       String collectionToSearch =
           userRole == 'Track' ? 'trackUsers' : 'trackingUsers';
 
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
+      _subscription = FirebaseFirestore.instance
           .collection(collectionToSearch)
           .doc(user.uid)
           .collection('contacts')
-          .get();
+          .snapshots()
+          .listen((snapshot) {
+        _contacts = snapshot.docs.map((doc) {
+          return Contact.fromFirestore(doc);
+        }).toList();
 
-      _contacts = snapshot.docs.map((doc) {
-        return Contact.fromFirestore(doc);
-      }).toList();
+        // Save to SharedPreferences
+        SharedPreferences.getInstance().then((prefs) {
+          String contactsJson =
+              jsonEncode(_contacts.map((contact) => contact.toJson()).toList());
+          prefs.setString('contacts', contactsJson);
+          print('Contacts updated from Firestore: ${_contacts.length}');
+        });
 
-      // Save to SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String contactsJson =
-          jsonEncode(_contacts.map((contact) => contact.toJson()).toList());
-      prefs.setString('contacts', contactsJson);
-
+        _isLoading = false;
+        notifyListeners();
+      });
+    } else {
+      print('User is not logged in');
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }

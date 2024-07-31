@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gentech/app%20notification/push_notification.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
+import 'package:gentech/extension/sizebox_extension.dart';
 import 'package:gentech/firebase%20functions/get_device_token.dart';
 import 'package:gentech/model/contact_model.dart';
 import 'package:gentech/provider/contact_provider.dart';
@@ -18,76 +19,92 @@ class ContactListview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => ContactProvider()..fetchContacts(context),
+      create: (context) => ContactProvider()..subscribeToContacts(context),
       child: Consumer<ContactProvider>(
         builder: (context, contactProvider, _) {
           if (contactProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else {
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: contactProvider.contacts.length,
-              itemBuilder: (context, index) {
-                final contact = contactProvider.contacts[index];
-                return Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.secondary.withOpacity(0.09),
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage: contact.imageUrl.isNotEmpty
-                            ? NetworkImage(contact.imageUrl)
-                            : const AssetImage(AppImages.profile)
-                                as ImageProvider,
-                        radius: 20.0,
-                      ),
-                      const SizedBox(width: 16.0),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            contact.name,
-                            style: const TextStyle(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'Montserrat',
-                              color: AppColors.primary,
-                            ),
-                          ),
-                          Row(
-                            children: [
-                              const Icon(Icons.phone,
-                                  size: 16.0, color: AppColors.primary),
-                              const SizedBox(width: 8.0),
-                              Text(
-                                contact.phoneNumber,
-                                style: const TextStyle(
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.w400,
-                                  fontFamily: 'Montserrat',
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      IconButtonWithMenu(
-                        phoneNumber: contact.phoneNumber,
-                        email: contact.email,
-                        contacts: contact,
-                        receiverId: contact.uid,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
           }
+
+          // If the contacts are empty after loading, fetch from Firestore
+          if (contactProvider.contacts.isEmpty) {
+            // contactProvider.subscribeToContacts(context);
+          }
+
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: contactProvider.contacts.length,
+            itemBuilder: (context, index) {
+              final contact = contactProvider.contacts[index];
+              return Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withOpacity(0.09),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: contact.imageUrl.isNotEmpty
+                              ? NetworkImage(contact.imageUrl)
+                              : const AssetImage(AppImages.profile)
+                                  as ImageProvider,
+                          radius: 20.0,
+                          // child: contact.imageUrl.isNotEmpty
+                          //     ? Image.network(contact.imageUrl)
+                          //     : const Icon(
+                          //         Icons.person,
+                          //         size: 35.0,
+                          //       ),
+                        ),
+                        const SizedBox(width: 16.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              contact.name,
+                              style: const TextStyle(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Montserrat',
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                const Icon(Icons.phone,
+                                    size: 16.0, color: AppColors.primary),
+                                const SizedBox(width: 8.0),
+                                Text(
+                                  contact.phoneNumber,
+                                  style: const TextStyle(
+                                    fontSize: 12.0,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: 'Montserrat',
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        IconButtonWithMenu(
+                          phoneNumber: contact.phoneNumber,
+                          email: contact.email,
+                          contacts: contact,
+                          receiverId: contact.uid,
+                        ),
+                      ],
+                    ),
+                  ),
+                  10.ph,
+                ],
+              );
+            },
+          );
         },
       ),
     );
