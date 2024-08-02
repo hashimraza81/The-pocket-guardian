@@ -411,10 +411,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         final name = sender.get('name') ?? 'Unknown Sender';
                                         final imageUrl = sender.get('imageUrl') as String?;
                                        // final deviceToken = sender.get('deviceToken');
+                                        // final deviceToken = sender.get('deviceToken');
 
                                         return RequestItem(
                                           name: name,
                                           actionText: "wants to access your location",
+                                          //actionItem: 'Accept',
                                           //actionItem: 'Accept',
                                           imageUrl: imageUrl,
                                           showButtons: true,
