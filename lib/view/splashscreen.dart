@@ -54,7 +54,7 @@ class _SplashscreenState extends State<Splashscreen> {
                   onPressed: () {
                     Provider.of<UserChoiceProvider>(context, listen: false)
                         .setUserChoice('Track');
-                    Navigator.pushReplacementNamed(
+                    Navigator.pushNamed(
                         context, RoutesName.loginOrSignup);
                   },
                   colorbg: AppColors.secondary,
@@ -66,7 +66,7 @@ class _SplashscreenState extends State<Splashscreen> {
                   onPressed: () {
                     Provider.of<UserChoiceProvider>(context, listen: false)
                         .setUserChoice('Tracking');
-                    Navigator.pushReplacementNamed(
+                    Navigator.pushNamed(
                         context, RoutesName.loginOrSignup);
                   },
                   colorbg: AppColors.white,

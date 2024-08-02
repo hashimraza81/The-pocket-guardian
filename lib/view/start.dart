@@ -163,7 +163,7 @@ class _StartState extends State<Start> {
     super.initState();
     _initializeFirebaseMessaging();
     // Schedule navigation to the next screen after a 10 second delay
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushNamed(context, RoutesName.splashscreen);
     });
   }

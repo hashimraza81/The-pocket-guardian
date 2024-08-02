@@ -118,7 +118,56 @@ class PushNotification {
   //     print('Response body: ${response.body}');
   //   }
   // }
+  static sendNotificationToUser(
+      String deviceToken,
+      BuildContext context,
+      String senderId,
+      String receiverId,
+      String title,
+      String body,
+      ) async {
 
+    final firestore = FirebaseFirestore.instance;
+    await firestore.collection('pushNotifications').add({
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'timestamp': FieldValue.serverTimestamp(),
+      'title': title,
+      'messagebody': body,
+    });
+    final String serviceKey = await PushNotification.getAccessToken();
+    String endpointFirebaseCloudMessaging =
+        'https://fcm.googleapis.com/v1/projects/gentech-4aa53/messages:send';
+
+    final Map<String, dynamic> message = {
+      'message': {
+        'token': deviceToken,
+        'notification': {
+          'title': title,
+          'body': body,
+        },
+        'data': {
+          'route': RoutesName.notification, // Add this line to specify the route
+        },
+      },
+    };
+
+    final http.Response response = await http.post(
+      Uri.parse(endpointFirebaseCloudMessaging),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $serviceKey',
+      },
+      body: jsonEncode(message),
+    );
+
+    if (response.statusCode == 200) {
+      print('Notification Sent Successfully');
+    } else {
+      print('Failed to send FCM message: ${response.statusCode}');
+      print('Response body: ${response.body}');
+    }
+  }
 static sendNotificationToSelectedRole(
   String deviceToken,
   BuildContext context,
