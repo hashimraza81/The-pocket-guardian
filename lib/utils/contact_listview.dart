@@ -14,7 +14,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ContactListview extends StatelessWidget {
-  const ContactListview({super.key});
+  final void Function(Contact contact)? onContactSelected;
+  const ContactListview({super.key, this.onContactSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -36,72 +37,77 @@ class ContactListview extends StatelessWidget {
             itemCount: contactProvider.contacts.length,
             itemBuilder: (context, index) {
               final contact = contactProvider.contacts[index];
-              return Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.secondary.withOpacity(0.09),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: contact.imageUrl.isNotEmpty
-                              ? NetworkImage(contact.imageUrl)
-                              : const AssetImage(AppImages.profile)
-                                  as ImageProvider,
-                          radius: 20.0,
-                          // child: contact.imageUrl.isNotEmpty
-                          //     ? Image.network(contact.imageUrl)
-                          //     : const Icon(
-                          //         Icons.person,
-                          //         size: 35.0,
-                          //       ),
-                        ),
-                        const SizedBox(width: 16.0),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              contact.name,
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w700,
-                                fontFamily: 'Montserrat',
-                                color: AppColors.primary,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                const Icon(Icons.phone,
-                                    size: 16.0, color: AppColors.primary),
-                                const SizedBox(width: 8.0),
-                                Text(
-                                  contact.phoneNumber,
-                                  style: const TextStyle(
-                                    fontSize: 12.0,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: 'Montserrat',
-                                    color: AppColors.primary,
-                                  ),
+              return InkWell(
+                onTap: onContactSelected != null
+                    ? () => onContactSelected!(contact)
+                    : null,
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.09),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage: contact.imageUrl.isNotEmpty
+                                ? NetworkImage(contact.imageUrl)
+                                : const AssetImage(AppImages.profile)
+                                    as ImageProvider,
+                            radius: 20.0,
+                            // child: contact.imageUrl.isNotEmpty
+                            //     ? Image.network(contact.imageUrl)
+                            //     : const Icon(
+                            //         Icons.person,
+                            //         size: 35.0,
+                            //       ),
+                          ),
+                          const SizedBox(width: 16.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                contact.name,
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Montserrat',
+                                  color: AppColors.primary,
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const Spacer(),
-                        IconButtonWithMenu(
-                          phoneNumber: contact.phoneNumber,
-                          email: contact.email,
-                          contacts: contact,
-                          receiverId: contact.uid,
-                        ),
-                      ],
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(Icons.phone,
+                                      size: 16.0, color: AppColors.primary),
+                                  const SizedBox(width: 8.0),
+                                  Text(
+                                    contact.phoneNumber,
+                                    style: const TextStyle(
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Montserrat',
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          IconButtonWithMenu(
+                            phoneNumber: contact.phoneNumber,
+                            email: contact.email,
+                            contacts: contact,
+                            receiverId: contact.uid,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  10.ph,
-                ],
+                    10.ph,
+                  ],
+                ),
               );
             },
           );

@@ -71,21 +71,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Update email in Firebase Authentication
         if (emailController.text != user.email) {
           try {
-            await user.updateEmail(emailController.text);
-            await user.sendEmailVerification(); // Send verification email
+            await user.verifyBeforeUpdateEmail(emailController.text);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                   content: Text(
-                      'Email updated successfully. Please check your new email for verification.')),
+                      'Email verification sent. Please verify the new email before it can be updated.')),
             );
           } on FirebaseAuthException catch (e) {
-            // Handle email update error
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error updating email: ${e.message}')),
             );
             return;
           }
         }
+
+        // if (userId.isNotEmpty) {
+        //   final userChoiceProvider =
+        //       Provider.of<UserChoiceProvider>(context, listen: false);
+
+        //   User? user = FirebaseAuth.instance.currentUser;
+        //   if (user != null) {
+        //     // Update email in Firebase Authentication
+        //     if (emailController.text != user.email) {
+        //       try {
+        //         await user.verifyBeforeUpdateEmail(emailController.text);
+        //         ScaffoldMessenger.of(context).showSnackBar(
+        //           const SnackBar(
+        //               content: Text(
+        //                   'Email verification sent. Please verify the new email before it can be updated.')),
+        //         );
+        //       } on FirebaseAuthException catch (e) {
+        //         ScaffoldMessenger.of(context).showSnackBar(
+        //           SnackBar(content: Text('Error updating email: ${e.message}')),
+        //         );
+        //         return;
+        //       }
+        //     }
+        // if (userId.isNotEmpty) {
+        //   final userChoiceProvider =
+        //       Provider.of<UserChoiceProvider>(context, listen: false);
+
+        //   User? user = FirebaseAuth.instance.currentUser;
+        //   if (user != null) {
+        //     // Update email in Firebase Authentication
+        //     if (emailController.text != user.email) {
+        //       try {
+        //         await user.updateEmail(emailController.text);
+        //         await user.sendEmailVerification(); // Send verification email
+        //         ScaffoldMessenger.of(context).showSnackBar(
+        //           const SnackBar(
+        //               content: Text(
+        //                   'Email updated successfully. Please check your new email for verification.')),
+        //         );
+        //       } on FirebaseAuthException catch (e) {
+        //         ScaffoldMessenger.of(context).showSnackBar(
+        //           SnackBar(content: Text('Error updating email: ${e.message}')),
+        //         );
+        //         return;
+        //       }
+        //     }
 
         // Update password in Firebase Authentication
         if (passwordController.text.isNotEmpty) {
@@ -95,7 +139,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SnackBar(content: Text('Password updated successfully')),
             );
           } on FirebaseAuthException catch (e) {
-            // Handle password update error
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error updating password: ${e.message}')),
             );
@@ -239,7 +282,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 left: 15.0.w,
                 right: 15.0.w,
                 child: Container(
-                  height: 460.0.h,
+                  height: 500.0.h,
                   width: 360.0.w,
                   decoration: BoxDecoration(
                     color: AppColors.secondary.withOpacity(0.2),
@@ -247,50 +290,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15.0.w),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          63.ph,
-                          CustomTextField(
-                            controller: usernameController,
-                            text: 'Name',
-                            toHide: false,
-                            iconData: Icons.edit,
-                          ),
-                          24.0.ph,
-                          CustomTextField(
-                            controller: emailController,
-                            text: 'Email',
-                            toHide: false,
-                            iconData: Icons.edit,
-                          ),
-                          24.0.ph,
-                          CustomTextField(
-                            controller: passwordController,
-                            text: '*****',
-                            toHide: true,
-                            iconData: Icons.edit,
-                          ),
-                          24.0.ph,
-                          CustomTextField(
-                            controller: phonenumberController,
-                            text: 'Phone Number',
-                            toHide: false,
-                            iconData: Icons.edit,
-                          ),
-                          24.0.ph,
-                          ReusedButton(
-                            text: 'Update Profile',
-                            onPressed: () {
-                              updateUserData();
-                            },
-                            colorbg: AppColors.secondary,
-                            colortext: AppColors.white,
-                          ),
-                          10.0.ph,
-                        ],
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        63.ph,
+                        CustomTextField(
+                          controller: usernameController,
+                          text: 'Name',
+                          toHide: false,
+                          iconData: Icons.edit,
+                        ),
+                        24.0.ph,
+                        CustomTextField(
+                          controller: emailController,
+                          text: 'Email',
+                          toHide: false,
+                          iconData: Icons.edit,
+                        ),
+                        24.0.ph,
+                        CustomTextField(
+                          controller: passwordController,
+                          text: '*****',
+                          toHide: true,
+                          iconData: Icons.edit,
+                        ),
+                        24.0.ph,
+                        CustomTextField(
+                          controller: phonenumberController,
+                          text: 'Phone Number',
+                          toHide: false,
+                          iconData: Icons.edit,
+                        ),
+                        24.0.ph,
+                        ReusedButton(
+                          text: 'Update Profile',
+                          onPressed: () {
+                            updateUserData();
+                          },
+                          colorbg: AppColors.secondary,
+                          colortext: AppColors.white,
+                        ),
+                        10.0.ph,
+                      ],
                     ),
                   ),
                 ),

@@ -731,6 +731,7 @@ import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
 import 'package:gentech/model/contact_model.dart';
+import 'package:gentech/utils/contact_listview.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
 import 'package:gentech/view/To%20Be%20Tracked/home.dart';
 import 'package:geolocator/geolocator.dart';
@@ -846,6 +847,63 @@ class _AlertScreenState extends State<AlertScreen> {
     }
   }
 
+  void _showContactDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CustomDialog(
+          onContactSelected: (contact) {
+            // Handle contact selection here
+            Navigator.pop(context);
+            _showContactOptionsDialog(contact);
+          },
+        );
+      },
+    );
+  }
+
+  void _showContactOptionsDialog(Contact contact) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Contact Options'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.call),
+                title: const Text('Call'),
+                onTap: () {
+                  launchUrl(
+                    Uri(
+                      scheme: 'tel',
+                      path: contact.phoneNumber,
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.message),
+                title: const Text('Message'),
+                onTap: () {
+                  launchUrl(
+                    Uri(
+                      scheme: 'sms',
+                      path: contact.phoneNumber,
+                    ),
+                  );
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -951,56 +1009,75 @@ class _AlertScreenState extends State<AlertScreen> {
                         padding: EdgeInsets.symmetric(
                           horizontal: 16.0.w,
                         ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: contacts.length,
-                          itemBuilder: (context, index) {
-                            final contact = contacts[index];
-                            return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0.h),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Button(
-                                    text: 'Message',
-                                    onPressed: () async {
-                                      await launchUrl(
-                                        Uri(
-                                          scheme: 'sms',
-                                          path: contact.phoneNumber,
-                                        ),
-                                      );
-                                    },
-                                    colorbg: Colors.transparent,
-                                    bordercolor: AppColors.white,
-                                    colortext: AppColors.white,
-                                    image: AppImages.msg,
-                                  ),
-                                  Button(
-                                    text: 'Call',
-                                    onPressed: () async {
-                                      await launchUrl(
-                                        Uri(
-                                          scheme: 'tel',
-                                          path: contact.phoneNumber,
-                                        ),
-                                      );
-                                    },
-                                    colorbg: Colors.transparent,
-                                    bordercolor: AppColors.white,
-                                    colortext: AppColors.white,
-                                    image: AppImages.call,
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Button(
+                              text: 'Message',
+                              onPressed: () async {
+                                _showContactDialog();
+                              },
+                              colorbg: Colors.transparent,
+                              bordercolor: AppColors.white,
+                              colortext: AppColors.white,
+                              image: AppImages.msg,
+                            ),
+                            Button(
+                              text: 'Call',
+                              onPressed: () {
+                                _showContactDialog();
+                              },
+                              colorbg: Colors.transparent,
+                              bordercolor: AppColors.white,
+                              colortext: AppColors.white,
+                              image: AppImages.call,
+                            ),
+                          ],
                         ),
                       ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomDialog extends StatelessWidget {
+  final void Function(Contact contact) onContactSelected;
+
+  const CustomDialog({super.key, required this.onContactSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0.r),
+      ),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: 16.0.h,
+          horizontal: 10.0.w,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                'Contacts',
+                style: TextStyle(
+                  fontSize: 18.0.sp,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Montserrat',
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+            16.0.ph,
+            ContactListview(onContactSelected: onContactSelected),
+          ],
         ),
       ),
     );

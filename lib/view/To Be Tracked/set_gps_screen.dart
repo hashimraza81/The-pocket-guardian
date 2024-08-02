@@ -178,7 +178,7 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
                               ),
                               Text(
                                 locationProvider.currentAddress ??
-                                    'Set Gps location',
+                                    'Set GPS location',
                                 style: TextStyle(
                                   fontSize: 16.0.sp,
                                   fontWeight: FontWeight.w600,
@@ -215,8 +215,8 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
                                   color: AppColors.grey4, width: 1),
                             ),
                           ),
-                          onPressed: () {
-                            locationProvider.getUserCurrentLocation();
+                          onPressed: () async {
+                            await locationProvider.getUserCurrentLocation();
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -288,7 +288,7 @@ class CustomDialog extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(
           vertical: 16.0.h,
-          horizontal: 16.0.w,
+          horizontal: 10.0.w,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

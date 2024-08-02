@@ -273,7 +273,7 @@ class LocationPlacesProvider with ChangeNotifier {
       savedLatitude = doc.data()?['pinLocation']['latitude'];
       savedLongitude = doc.data()?['pinLocation']['longitude'];
       print(
-          'Initial location fetched: $selectedLocation, $savedLatitude, $savedLongitude'); // Debug
+          'Initial location fetched: $selectedLocation, $savedLatitude, $savedLongitude');
       notifyListeners();
     }
   }
@@ -339,8 +339,7 @@ class LocationPlacesProvider with ChangeNotifier {
     }
   }
 
-  Future<LatLng?> getUserCurrentLocation() async {
-    print('hashim 1');
+  Future<void> getUserCurrentLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -360,40 +359,38 @@ class LocationPlacesProvider with ChangeNotifier {
             'Location permissions are permanently denied, we cannot request permissions.');
       }
 
-      _positionStreamSubscription =
-          Geolocator.getPositionStream().listen((Position position) async {
-        _currentPosition = position;
-        _markers.clear();
-        _markers.add(Marker(
-          markerId: const MarkerId('1'),
-          position: LatLng(position.latitude, position.longitude),
-        ));
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
 
-        CameraPosition cameraPosition = CameraPosition(
-          target: LatLng(position.latitude, position.longitude),
-          zoom: 14,
-        );
+      _currentPosition = position;
+      _markers.clear();
+      _markers.add(Marker(
+        markerId: const MarkerId('1'),
+        position: LatLng(position.latitude, position.longitude),
+      ));
 
-        final GoogleMapController controller = await _completer.future;
-        controller
-            .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+      CameraPosition cameraPosition = CameraPosition(
+        target: LatLng(position.latitude, position.longitude),
+        zoom: 14,
+      );
 
-        // Fetch the address based on the current position
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-            position.latitude, position.longitude);
-        print('hashim');
-        _currentAddress =
-            '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}';
+      final GoogleMapController controller = await _completer.future;
+      controller.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
 
-        // Save to Firebase
-        await saveLocationToFirestore(position);
+      // Fetch the address based on the current position
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+      print('hashim');
+      _currentAddress =
+          '${placemarks.first.street}, ${placemarks.first.locality}, ${placemarks.first.administrativeArea}, ${placemarks.first.country}';
 
-        notifyListeners();
-      });
+      // Save to Firebase
+      await saveLocationToFirestore(position);
+
+      notifyListeners();
     } catch (e) {
       print("Error: $e");
     }
-    return null;
   }
 
   Future<void> saveLocationToFirestore(Position position) async {

@@ -4,10 +4,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
+import 'package:gentech/provider/contact_provider.dart';
 import 'package:gentech/provider/tracking_bottom_bar_Provider.dart';
 import 'package:gentech/routes/routes_names.dart';
+import 'package:gentech/utils/custom_bottom_bar.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
-import 'package:gentech/view/Tracking/tracking_bottom_bar.dart';
 import 'package:provider/provider.dart';
 
 class UnlockPhone extends StatefulWidget {
@@ -18,6 +19,23 @@ class UnlockPhone extends StatefulWidget {
 }
 
 class _UnlockPhoneState extends State<UnlockPhone> {
+  bool isChecked = false;
+
+  void _onCheckboxChanged(bool? value) {
+    if (value == null) return;
+
+    setState(() {
+      isChecked = value;
+    });
+
+    if (isChecked) {
+      // Delay for 3 seconds and then navigate
+      Future.delayed(const Duration(seconds: 3), () {
+        Navigator.pushNamed(context, RoutesName.setreminder);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -100,17 +118,138 @@ class _UnlockPhoneState extends State<UnlockPhone> {
                             familyFont: 'Montserrat',
                           ),
                           14.0.ph,
-                          const ContactItem(
-                            name: 'Brother',
-                            phoneNumber: '(704) 555-0127',
-                            imagePath: AppImages.profile,
-                          ),
-                          10.0.ph,
-                          const ContactItem(
-                            name: 'Sister',
-                            phoneNumber: '(704) 555-0127',
-                            imagePath: AppImages.sister,
-                          ),
+                          // const ContactItem(
+                          //   name: 'Brother',
+                          //   phoneNumber: '(704) 555-0127',
+                          //   imagePath: AppImages.profile,
+                          // ),
+                          // 10.0.ph,
+                          // const ContactItem(
+                          //   name: 'Sister',
+                          //   phoneNumber: '(704) 555-0127',
+                          //   imagePath: AppImages.sister,
+                          // ),
+                          ChangeNotifierProvider(
+                            create: (context) =>
+                                ContactProvider()..subscribeToContacts(context),
+                            child: Consumer<ContactProvider>(
+                              builder: (context, contactProvider, _) {
+                                if (contactProvider.isLoading) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+
+                                // If the contacts are empty after loading, fetch from Firestore
+                                if (contactProvider.contacts.isEmpty) {
+                                  // contactProvider.subscribeToContacts(context);
+                                }
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: contactProvider.contacts.length,
+                                  itemBuilder: (context, index) {
+                                    final contact =
+                                        contactProvider.contacts[index];
+                                    return Column(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: AppColors.secondary
+                                                .withOpacity(0.09),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: Row(
+                                            children: [
+                                              CircleAvatar(
+                                                backgroundImage: contact
+                                                        .imageUrl.isNotEmpty
+                                                    ? NetworkImage(
+                                                        contact.imageUrl)
+                                                    : const AssetImage(
+                                                            AppImages.profile)
+                                                        as ImageProvider,
+                                                radius: 20.0,
+                                                // child: contact.imageUrl.isNotEmpty
+                                                //     ? Image.network(contact.imageUrl)
+                                                //     : const Icon(
+                                                //         Icons.person,
+                                                //         size: 35.0,
+                                                //       ),
+                                              ),
+                                              const SizedBox(width: 16.0),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    contact.name,
+                                                    style: const TextStyle(
+                                                      fontSize: 14.0,
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      fontFamily: 'Montserrat',
+                                                      color: AppColors.primary,
+                                                    ),
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Icon(Icons.phone,
+                                                          size: 16.0,
+                                                          color: AppColors
+                                                              .primary),
+                                                      const SizedBox(
+                                                          width: 8.0),
+                                                      Text(
+                                                        contact.phoneNumber,
+                                                        style: const TextStyle(
+                                                          fontSize: 12.0,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          fontFamily:
+                                                              'Montserrat',
+                                                          color:
+                                                              AppColors.primary,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              const Spacer(),
+                                              CircleAvatar(
+                                                radius: 10.0,
+                                                backgroundColor:
+                                                    AppColors.white,
+                                                child: Transform.scale(
+                                                  scale: 0.8,
+                                                  child: Checkbox(
+                                                    value: isChecked,
+                                                    onChanged:
+                                                        _onCheckboxChanged,
+                                                    activeColor:
+                                                        AppColors.secondary,
+                                                    checkColor: AppColors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                              // IconButtonWithMenu(
+                                              //   phoneNumber: contact.phoneNumber,
+                                              //   email: contact.email,
+                                              //   contacts: contact,
+                                              //   receiverId: contact.uid,
+                                              // ),
+                                            ],
+                                          ),
+                                        ),
+                                        10.ph,
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          )
                         ],
                       ),
                     ),
@@ -119,7 +258,7 @@ class _UnlockPhoneState extends State<UnlockPhone> {
               ),
             ),
           ),
-          bottomNavigationBar: const TrackingBottomBar(),
+          bottomNavigationBar: const CustomBottomBar(),
         ),
       ),
     );

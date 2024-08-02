@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
 import 'package:gentech/provider/tracking_bottom_bar_Provider.dart';
+import 'package:gentech/utils/custom_bottom_bar.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
-import 'package:gentech/view/Tracking/tracking_bottom_bar.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 
@@ -126,7 +126,8 @@ class _SetReminderState extends State<SetReminder> {
                               ],
                             ),
                           ),
-                          20.0.ph,
+                          // 20.0.ph,
+                          5.ph,
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 10),
@@ -277,7 +278,7 @@ class _SetReminderState extends State<SetReminder> {
                               ),
                             ),
                           ),
-                          20.0.ph,
+                          // 20.0.ph,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -308,7 +309,7 @@ class _SetReminderState extends State<SetReminder> {
               ),
             ),
           ),
-          bottomNavigationBar: const TrackingBottomBar(),
+          bottomNavigationBar: const CustomBottomBar(),
         ),
       ),
     );
