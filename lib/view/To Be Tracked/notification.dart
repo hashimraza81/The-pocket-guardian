@@ -412,6 +412,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         final imageUrl = sender.get('imageUrl') as String?;
                                        // final deviceToken = sender.get('deviceToken');
                                         // final deviceToken = sender.get('deviceToken');
+                                        // final deviceToken = sender.get('deviceToken');
 
                                         return RequestItem(
                                           name: name,
