@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:gentech/app%20notification/push_notification.dart';
 import 'package:gentech/const/app_colors.dart';
@@ -12,10 +16,16 @@ import 'package:gentech/provider/places_provider.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:http/http.dart' as http;
+
+import '../routes/routes_names.dart';
 
 class ContactListview extends StatelessWidget {
   final void Function(Contact contact)? onContactSelected;
   const ContactListview({super.key, this.onContactSelected});
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -261,25 +271,104 @@ class IconButtonWithMenu extends StatelessWidget {
             },
           ),
         ),
+        // PopupMenuItem(
+        //   child: _buildOption(
+        //     context,
+        //     "App notifications",
+        //     Provider.of<OptionProvider>(context, listen: false)
+        //                 .selectedOption ==
+        //             "App notifications"
+        //         ? AppColors.secondary
+        //         : AppColors.secondary.withOpacity(0.1),
+        //     Provider.of<OptionProvider>(context, listen: false)
+        //                 .selectedOption ==
+        //             "App notifications"
+        //         ? Colors.white
+        //         : AppColors.primary,
+        //     () async {
+        //       Position? position = await _onLocationIconTapped();
+        //       if (position != null) {
+        //         Provider.of<OptionProvider>(context, listen: false)
+        //             .setSelectedOption("App notifications");
+        //
+        //         // Fetch the device token from the contact
+        //         String? deviceToken = await getDeviceTokenFromContact(contacts);
+        //
+        //         if (deviceToken != null) {
+        //           User? currentUser = FirebaseAuth.instance.currentUser;
+        //           if (currentUser != null) {
+        //             String senderId = currentUser.uid;
+        //             String mapsUrl =
+        //                 'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
+        //             String body = mapsUrl;
+        //             await PushNotification.sendNotificationToSelectedRole(
+        //               deviceToken,
+        //               context,
+        //               senderId,
+        //               receiverId,
+        //               position.latitude,
+        //               position.longitude,
+        //               "Notification",
+        //               body,
+        //             );
+        //           } else {
+        //             print('Failed to retrieve current user ID.');
+        //           }
+        //         } else {
+        //           print('Failed to retrieve device token.');
+        //         }
+        //       }
+        //
+        //       Navigator.pop(context);
+        //     },
+        //   ),
+        //   // () async {
+        //   //   var latalng = _onLocationIconTapped();
+        //   //   Provider.of<OptionProvider>(context, listen: false)
+        //   //       .setSelectedOption("App notifications");
+        //
+        //   //   // final locationProvider = Provider.of<LocationProvider>(context);
+        //   //   // print("hashim ${locationProvider.currentAddress}");
+        //
+        //   //   // Fetch the device token from the contact
+        //   //   String? deviceToken = await getDeviceTokenFromContact(contacts);
+        //
+        //   //   if (deviceToken != null) {
+        //   //     // Use the device token to send a notification
+        //   //     // PushNotification.sendNotificationToSelectedRole(
+        //   //     //     deviceToken, context, 'Notification title or message');
+        //
+        //   //     // PushNotification.sendNotificationToSelectedRole(
+        //   //     //   deviceToken,
+        //   //     //   context,
+        //   //     //   'senderId',
+        //   //     //   'receiverId',
+        //   //     //   'SenderName is requesting you acsess his/her location ',
+        //   //     //   latalng,
+        //   //     // );
+        //
+        //   //     PushNotification.sendNotificationToSelectedRole(deviceToken, context, 'senderId', 'receiverId', lat, lng, "title", 'body',)
+        //   //   } else {
+        //   //     print('Failed to retrieve device token.');
+        //   //   }
+        //
+        //   //   Navigator.pop(context);
+        //   // },
+        // ),
         PopupMenuItem(
           child: _buildOption(
             context,
             "App notifications",
-            Provider.of<OptionProvider>(context, listen: false)
-                        .selectedOption ==
-                    "App notifications"
+            Provider.of<OptionProvider>(context, listen: false).selectedOption == "App notifications"
                 ? AppColors.secondary
                 : AppColors.secondary.withOpacity(0.1),
-            Provider.of<OptionProvider>(context, listen: false)
-                        .selectedOption ==
-                    "App notifications"
+            Provider.of<OptionProvider>(context, listen: false).selectedOption == "App notifications"
                 ? Colors.white
                 : AppColors.primary,
-            () async {
+                () async {
               Position? position = await _onLocationIconTapped();
               if (position != null) {
-                Provider.of<OptionProvider>(context, listen: false)
-                    .setSelectedOption("App notifications");
+                Provider.of<OptionProvider>(context, listen: false).setSelectedOption("App notifications");
 
                 // Fetch the device token from the contact
                 String? deviceToken = await getDeviceTokenFromContact(contacts);
@@ -287,20 +376,56 @@ class IconButtonWithMenu extends StatelessWidget {
                 if (deviceToken != null) {
                   User? currentUser = FirebaseAuth.instance.currentUser;
                   if (currentUser != null) {
-                    String senderId = currentUser.uid;
-                    String mapsUrl =
-                        'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
-                    String body = mapsUrl;
-                    await PushNotification.sendNotificationToSelectedRole(
-                      deviceToken,
-                      context,
-                      senderId,
-                      receiverId,
-                      position.latitude,
-                      position.longitude,
-                      "Notification",
-                      body,
-                    );
+                     String senderId = currentUser.uid;
+                    // String mapsUrl = 'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
+
+                    // Check the user's role and set the notification body accordingly
+                    DocumentSnapshot trackingUserDoc = await FirebaseFirestore.instance
+                        .collection('trackingUsers')
+                        .doc(senderId)
+                        .get();
+
+                    String body;
+
+                    if (trackingUserDoc.exists) {
+                      // Notification body for TrackingUser
+                      String senderId = currentUser.uid;
+                      await PushNotification.sendNotificationToUser(
+                        deviceToken,
+                        context,
+                        senderId,
+                        receiverId,
+                        "Notification",
+                        "I want to access your location"
+                      );
+                    } else {
+                      // Check if the user is in the 'TrackedUser' collection
+                      DocumentSnapshot trackedUserDoc = await FirebaseFirestore.instance
+                          .collection('trackUsers')
+                          .doc(senderId)
+                          .get();
+
+                      if (trackedUserDoc.exists) {
+                        // Notification body for TrackedUser
+                        String senderId = currentUser.uid;
+                                    String mapsUrl =
+                                        'https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}';
+                        String body = mapsUrl;
+                        await PushNotification.sendNotificationToSelectedRole(
+                          deviceToken,
+                          context,
+                          senderId,
+                          receiverId,
+                          position.latitude,
+                          position.longitude,
+                          "Notification",
+                          body,
+                        );
+                      } else {
+                        print('User role is unknown.');
+                        return;
+                      }
+                    }
                   } else {
                     print('Failed to retrieve current user ID.');
                   }
@@ -312,42 +437,11 @@ class IconButtonWithMenu extends StatelessWidget {
               Navigator.pop(context);
             },
           ),
-          // () async {
-          //   var latalng = _onLocationIconTapped();
-          //   Provider.of<OptionProvider>(context, listen: false)
-          //       .setSelectedOption("App notifications");
-
-          //   // final locationProvider = Provider.of<LocationProvider>(context);
-          //   // print("hashim ${locationProvider.currentAddress}");
-
-          //   // Fetch the device token from the contact
-          //   String? deviceToken = await getDeviceTokenFromContact(contacts);
-
-          //   if (deviceToken != null) {
-          //     // Use the device token to send a notification
-          //     // PushNotification.sendNotificationToSelectedRole(
-          //     //     deviceToken, context, 'Notification title or message');
-
-          //     // PushNotification.sendNotificationToSelectedRole(
-          //     //   deviceToken,
-          //     //   context,
-          //     //   'senderId',
-          //     //   'receiverId',
-          //     //   'SenderName is requesting you acsess his/her location ',
-          //     //   latalng,
-          //     // );
-
-          //     PushNotification.sendNotificationToSelectedRole(deviceToken, context, 'senderId', 'receiverId', lat, lng, "title", 'body',)
-          //   } else {
-          //     print('Failed to retrieve device token.');
-          //   }
-
-          //   Navigator.pop(context);
-          // },
         ),
       ],
     );
   }
+
 
   Widget _buildOption(BuildContext context, String title, Color bgColor,
       Color textColor, VoidCallback onTap) {

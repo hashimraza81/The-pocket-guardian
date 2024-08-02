@@ -205,13 +205,13 @@ class FirebaseFunctions {
 
       // Navigate to the sign-in screen and remove all previous routes
       Navigator.pushNamedAndRemoveUntil(
-          context, RoutesName.signin, (route) => false);
+          context, RoutesName.splashscreen, (route) => false);
 
       // Show a snackbar message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           backgroundColor: Colors.green,
-          content: Text('User signed out successfully'),
+          content: Text('User logged out successfully'),
         ),
       );
     } catch (e) {
