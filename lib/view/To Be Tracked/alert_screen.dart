@@ -731,6 +731,7 @@ import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
 import 'package:gentech/model/contact_model.dart';
+import 'package:gentech/utils/contact_listview.dart';
 import 'package:gentech/utils/custom_text_widget.dart';
 import 'package:gentech/view/To%20Be%20Tracked/home.dart';
 import 'package:geolocator/geolocator.dart';
@@ -846,6 +847,117 @@ class _AlertScreenState extends State<AlertScreen> {
     }
   }
 
+  void _showMessageContactDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        print('hashim');
+        return CustomDialog(
+          onContactSelected: (contact) {
+            // Handle contact selection here
+            Navigator.pop(context);
+            _showMessageOptionsDialog(contact);
+          },
+        );
+      },
+    );
+  }
+
+  void _showCallContactDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return CustomDialog(
+          onContactSelected: (contact) {
+            // Handle contact selection here
+            Navigator.pop(context);
+            _showCallOptionsDialog(contact);
+          },
+        );
+      },
+    );
+  }
+
+  void _showCallOptionsDialog(Contact contact) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Contact Options for ${contact.name}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.call),
+                title: const Text('Call'),
+                onTap: () {
+                  // Directly launch a call to the contact's phone number
+                  _launchPhoneCall(contact.phoneNumber);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showMessageOptionsDialog(Contact contact) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Contact Options for ${contact.name}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.message),
+                title: const Text('Message'),
+                onTap: () {
+                  // Directly launch a message to the contact's phone number
+                  _launchSMS(contact.phoneNumber);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // void _launchPhoneCall(String phoneNumber) async {
+  //   final Uri launchUri = Uri(
+  //     scheme: 'tel',
+  //     path: phoneNumber,
+  //   );
+  //   if (await canLaunchUrl(launchUri)) {
+  //     await launchUrl(launchUri);
+  //   } else {
+  //     print('Could not launch $launchUri');
+  //   }
+  // }
+
+  void _launchPhoneCall(String phoneNumber) async {
+    await launchUrl(
+      Uri(
+        scheme: 'tel',
+        path: phoneNumber,
+      ),
+    );
+  }
+
+  void _launchSMS(String phoneNumber) async {
+    await launchUrl(
+      Uri(
+        scheme: 'sms',
+        path: phoneNumber,
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
@@ -903,14 +1015,32 @@ class _AlertScreenState extends State<AlertScreen> {
                     familyFont: 'Montserrat',
                   ),
                 ),
-                30.0.ph,
+                20.0.ph,
                 Center(
-                  child: CustomText(
-                    text: 'An alert has been sent to\n          your contacts',
-                    size: 16.0.sp,
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w500,
-                    familyFont: 'Montserrat',
+                  child: Column(
+                    children: [
+                      Text(
+                        'An alert will send to your contacts',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Montserrat',
+                        ),
+                        textAlign: TextAlign.justify,
+                      ),
+                      SizedBox(height: 4.h), // Space between lines
+                      Text(
+                        'after 30 seconds',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Montserrat',
+                        ),
+                        textAlign: TextAlign.center, // Center the specific text
+                      ),
+                    ],
                   ),
                 ),
                 48.0.ph,
@@ -951,55 +1081,77 @@ class _AlertScreenState extends State<AlertScreen> {
                         padding: EdgeInsets.symmetric(
                           horizontal: 16.0.w,
                         ),
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: contacts.length,
-                          itemBuilder: (context, index) {
-                            final contact = contacts[index];
-                            return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8.0.h),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Button(
-                                    text: 'Message',
-                                    onPressed: () async {
-                                      await launchUrl(
-                                        Uri(
-                                          scheme: 'sms',
-                                          path: contact.phoneNumber,
-                                        ),
-                                      );
-                                    },
-                                    colorbg: Colors.transparent,
-                                    bordercolor: AppColors.white,
-                                    colortext: AppColors.white,
-                                    image: AppImages.msg,
-                                  ),
-                                  Button(
-                                    text: 'Call',
-                                    onPressed: () async {
-                                      await launchUrl(
-                                        Uri(
-                                          scheme: 'tel',
-                                          path: contact.phoneNumber,
-                                        ),
-                                      );
-                                    },
-                                    colorbg: Colors.transparent,
-                                    bordercolor: AppColors.white,
-                                    colortext: AppColors.white,
-                                    image: AppImages.call,
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Button(
+                              text: 'Message',
+                              onPressed: () async {
+                                _showMessageContactDialog();
+                              },
+                              colorbg: Colors.transparent,
+                              bordercolor: AppColors.white,
+                              colortext: AppColors.white,
+                              image: AppImages.msg,
+                            ),
+                            Button(
+                              text: 'Call',
+                              onPressed: () {
+                                _showCallContactDialog();
+                              },
+                              colorbg: Colors.transparent,
+                              bordercolor: AppColors.white,
+                              colortext: AppColors.white,
+                              image: AppImages.call,
+                            ),
+                          ],
                         ),
                       ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomDialog extends StatelessWidget {
+  final void Function(Contact contact) onContactSelected;
+
+  const CustomDialog({super.key, required this.onContactSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0.r),
+      ),
+      child: Container(
+        // height: 400,
+        padding: EdgeInsets.symmetric(
+          vertical: 16.0.h,
+          horizontal: 1,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                // alignment: Alignment.topLeft,
+                child: Text(
+                  'Contacts',
+                  style: TextStyle(
+                    fontSize: 18.0.sp,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Montserrat',
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+              16.0.ph,
+              ContactListview(onContactSelected: onContactSelected),
+            ],
           ),
         ),
       ),
@@ -1027,25 +1179,14 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: colorbg,
-        borderRadius: BorderRadius.circular(128.r),
-        border: Border.all(
-          width: 1,
-          color: bordercolor ?? Colors.transparent,
-        ),
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
       ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          shadowColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(128.r),
-          ),
-          minimumSize: Size(170.w, 50.h),
-        ),
-        onPressed: onPressed,
+      onPressed: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [

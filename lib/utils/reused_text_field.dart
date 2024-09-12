@@ -8,6 +8,8 @@ class CustomTextField extends StatefulWidget {
   final IconData? iconData;
   final bool toHide;
   final void Function(String)? onchanged;
+  final FocusNode? focusNode;
+  final FocusNode? nextFocusNode;
 
   const CustomTextField({
     super.key,
@@ -16,6 +18,8 @@ class CustomTextField extends StatefulWidget {
     this.iconData,
     required this.toHide,
     this.onchanged,
+    this.focusNode,
+    this.nextFocusNode,
   });
 
   @override
@@ -53,6 +57,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      focusNode: widget.focusNode,
       style: TextStyle(
         fontFamily: 'Montserrat',
         fontSize: 16.sp,

@@ -77,6 +77,45 @@ class ContactProvider with ChangeNotifier {
     }
   }
 
+  Future<void> deleteContact(String documentId, BuildContext context) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      String userRole =
+          Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
+      String collectionToSearch =
+          userRole == 'Track' ? 'trackUsers' : 'trackingUsers';
+
+      try {
+        await FirebaseFirestore.instance
+            .collection(collectionToSearch)
+            .doc(user.uid)
+            .collection('contacts')
+            .doc(documentId) // Use the Firestore document ID
+            .delete();
+
+        print('Contact document deleted successfully from Firestore.');
+
+        // Update the local list and notify listeners
+        _contacts.removeWhere((contact) => contact.id == documentId);
+        notifyListeners();
+
+        // Update SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String contactsJson =
+            jsonEncode(_contacts.map((contact) => contact.toJson()).toList());
+        prefs.setString('contacts', contactsJson);
+      } catch (e) {
+        print('Failed to delete contact document from Firestore: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Error deleting contact. Please try again.')),
+        );
+      }
+    } else {
+      print('User is not logged in');
+    }
+  }
+
   @override
   void dispose() {
     _subscription?.cancel();

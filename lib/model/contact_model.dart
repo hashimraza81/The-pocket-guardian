@@ -18,21 +18,11 @@ class Contact {
     required this.imageUrl,
     required this.email,
     required this.deviceToken,
-    required this.reference,
+     required this.reference,
   });
 
   factory Contact.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-    // Debug output to check which fields might be null
-//     // print('Document data: $data');
-//     // print('uid: ${data['uid']}');
-//     // print('name: ${data['name']}');
-//     // print('phoneNumber: ${data['phonenumber']}');
-//     // print('imageUrl: ${data['imageUrl']}');
-//     // print('email: ${data['email']}');
-//     // print('deviceToken: ${data['deviceToken']}');
-//     // print('reference: ${data['reference']}');
 
     return Contact(
       id: doc.id,

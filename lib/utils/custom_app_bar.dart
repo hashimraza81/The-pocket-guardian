@@ -28,13 +28,14 @@ class customAppBar extends StatelessWidget {
           },
           child: CircleAvatar(
             radius: 30.r,
-            child: ClipOval(
-              child: Image.asset(
-                AppImages.profile,
-                fit: BoxFit.cover,
-                height: 60.h,
-                width: 60.w,
-              ),
+            child: CircleAvatar(
+              radius: 30.r,
+              backgroundColor: Colors.grey,
+              child: Icon(
+                Icons.person,
+                size: 60.w, // Adjust the size as per your requirement
+                color: Colors.white, // You can change the color as needed
+              ), // Adjust the background color if needed
             ),
           ),
         )

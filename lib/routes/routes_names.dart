@@ -25,4 +25,6 @@ class RoutesName {
   static const String livetracking = 'LiveTracking';
   static const String trackingAlert = 'TrackingAlert';
   static const String trackingaddnumber = 'trackingaddnumber';
+  static const String paymentscreen = 'paymentscreen';
+  static const String drawer = 'Drawer';
 }

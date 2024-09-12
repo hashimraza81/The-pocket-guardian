@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_zoom_drawer/flutter_zoom_drawer.dart';
 import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
 import 'package:gentech/provider/places_provider.dart';
-import 'package:gentech/provider/profile_Provider.dart';
-import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/routes/routes_names.dart';
 import 'package:gentech/utils/contact_listview.dart';
 import 'package:gentech/utils/custom_bottom_bar.dart';
@@ -16,6 +13,9 @@ import 'package:gentech/utils/reused_button.dart';
 import 'package:gentech/view/To%20Be%20Tracked/set_gps_screen.dart';
 import 'package:gentech/view/To%20Be%20Tracked/side_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+
+import '../../provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -26,34 +26,10 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   @override
-  Widget build(BuildContext context) {
-    return const ZoomDrawer(
-      menuScreen: SideDrawer(),
-      mainScreen: MainScreen(),
-      showShadow: true,
-      drawerShadowsBackgroundColor: AppColors.secondary,
-      menuBackgroundColor: AppColors.secondary,
-    );
-  }
-}
-
-class MainScreen extends StatefulWidget {
-  const MainScreen({
-    super.key,
-  });
-
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
-
-class _MainScreenState extends State<MainScreen> {
-  String profileImageUrl = '';
-
-  @override
   void initState() {
     super.initState();
     fetchUserProfile(context);
-    print('hellel');
+
     final placesProvider =
         Provider.of<LocationPlacesProvider>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,16 +38,12 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<void> fetchUserProfile(BuildContext context) async {
-    String userRole =
-        Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
-
-    await Provider.of<UserProfileProvider>(context, listen: false)
-        .fetchUserProfile(context, userRole);
+    await Provider.of<ProfileProvider>(context, listen: false).fetchUserData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProfileProvider = Provider.of<UserProfileProvider>(context);
+    final profileProvider = Provider.of<ProfileProvider>(context);
 
     return SafeArea(
       child: Scaffold(
@@ -93,7 +65,10 @@ class _MainScreenState extends State<MainScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
-                          ZoomDrawer.of(context)!.toggle();
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const SideDrawer()));
                         },
                         icon: const Icon(
                           Icons.menu,
@@ -109,72 +84,34 @@ class _MainScreenState extends State<MainScreen> {
                         onTap: () {
                           Navigator.pushNamed(context, RoutesName.profile);
                         },
-                        child: CircleAvatar(
-                          radius: 30.r,
-                          backgroundImage:
-                              userProfileProvider.profileImageUrl.isNotEmpty
-                                  ? NetworkImage(
-                                      userProfileProvider.profileImageUrl)
-                                  : const AssetImage(AppImages.men)
-                                      as ImageProvider,
-                          backgroundColor: Colors.transparent,
-                        ),
+                        child: profileProvider.isFetchingImage
+                            ? Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: CircleAvatar(
+                                  radius: 30.r,
+                                  backgroundColor: Colors.grey[300],
+                                ),
+                              )
+                            : CircleAvatar(
+                                radius: 30.r,
+                                backgroundImage:
+                                    profileProvider.imageUrl.isNotEmpty
+                                        ? NetworkImage(profileProvider.imageUrl)
+                                        : null,
+                                backgroundColor: Colors.transparent,
+                                child: profileProvider.imageUrl.isEmpty
+                                    ? Icon(
+                                        Icons.person,
+                                        size: 30.w,
+                                        color: Colors.black,
+                                      )
+                                    : null,
+                              ),
                       )
                     ],
                   ),
                   30.ph,
-                  Container(
-                    height: 160.0.h,
-                    width: 360.0.w,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20.r),
-                      image: DecorationImage(
-                        image: const AssetImage(AppImages.home),
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                            Colors.white.withOpacity(0.9), BlendMode.dstATop),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 10.0.h,
-                        horizontal: 15.0.w,
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CustomText(
-                              text: 'When to us the Pocket Guardian?',
-                              size: 16.sp,
-                              familyFont: 'Montserrat',
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.white,
-                            ),
-                            5.ph,
-                            CustomText(
-                              text:
-                                  '• To monitor the safety of a friend, colleague\n  or loved one',
-                              size: 14.sp,
-                              familyFont: 'Montserrat',
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.white,
-                            ),
-                            2.ph,
-                            CustomText(
-                              text:
-                                  '• When working alone in an isolated or\n  dangerous environment',
-                              size: 14.sp,
-                              familyFont: 'Montserrat',
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.white,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  24.ph,
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -184,7 +121,7 @@ class _MainScreenState extends State<MainScreen> {
                         onTap: () => Navigator.pushNamed(
                             context, RoutesName.unlockphone),
                       ),
-                      ReusedContainer(
+                      gpsContainer(
                         image: AppImages.gpslocation,
                         text: 'GPS location',
                         onTap: () {
@@ -192,58 +129,10 @@ class _MainScreenState extends State<MainScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const SetGpsScreen()));
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const TrackingLocation(
-
-                          //       imageUrl: null,
-                          //       phonenumber: null,
-                          //      fromNotificationRoute: false,
-                          //     ),
-                          //   ),
-                          // );
                         },
                       ),
                     ],
                   ),
-                  // Container(
-                  //   width: 360.w,
-                  //   height: 75.h,
-                  //   decoration: BoxDecoration(
-                  //     color: AppColors.white,
-                  //     borderRadius: BorderRadius.circular(5.r),
-                  //   ),
-                  //   child: Padding(
-                  //     padding: EdgeInsets.symmetric(
-                  //       vertical: 19.0.h,
-                  //       horizontal: 15.w,
-                  //     ),
-                  //     child: InkWell(
-                  //       onTap: () {
-                  //         Navigator.push(
-                  //             context,
-                  //             MaterialPageRoute(
-                  //                 builder: (context) => const SetGpsScreen()));
-                  //       },
-                  //       child: Row(
-                  //         children: [
-                  //           SvgPicture.asset(
-                  //             AppImages.gps,
-                  //           ),
-                  //           12.pw,
-                  //           CustomText(
-                  //             text: 'GPS location',
-                  //             size: 14.sp,
-                  //             color: AppColors.primary,
-                  //             fontWeight: FontWeight.w600,
-                  //             familyFont: 'Montserrat',
-                  //           )
-                  //         ],
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
                   24.ph,
                   const PlacesSearchScreen(),
                   24.ph,
@@ -257,16 +146,15 @@ class _MainScreenState extends State<MainScreen> {
                   20.0.ph,
                   const ContactListview(),
                   20.ph,
-                  Center(
-                    child: ReusedButton(
-                      text: "Add Numbers",
-                      onPressed: () {
-                        Navigator.pushNamed(context, RoutesName.addNumber);
-                      },
-                      colorbg: AppColors.secondary,
-                      colortext: AppColors.white,
-                    ),
+                  ReusedButton(
+                    text: "Add Numbers",
+                    onPressed: () {
+                      Navigator.pushNamed(context, RoutesName.addNumber);
+                    },
+                    colorbg: AppColors.secondary,
+                    colortext: AppColors.white,
                   ),
+                  10.ph,
                 ],
               ),
             ),
@@ -302,7 +190,7 @@ class ReusedContainer extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(
             vertical: 16.0.h,
-            horizontal: 20.0.w,
+            horizontal: 10.0.w,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -311,8 +199,56 @@ class ReusedContainer extends StatelessWidget {
               11.0.ph,
               Text(
                 text,
-                style: TextStyle(
-                  fontSize: 14.sp,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                  fontFamily: 'Montserrat',
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class gpsContainer extends StatelessWidget {
+  final String image;
+  final String text;
+  final VoidCallback onTap;
+
+  const gpsContainer({
+    super.key,
+    required this.image,
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10.0.r),
+          color: AppColors.white,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: 16.0.h,
+            horizontal: 12.0.w,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Image.asset(image),
+              11.0.ph,
+              Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: AppColors.primary,
                   fontFamily: 'Montserrat',

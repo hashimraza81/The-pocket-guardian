@@ -7,15 +7,16 @@ import 'package:gentech/view/To%20Be%20Tracked/forgot_password.dart';
 import 'package:gentech/view/To%20Be%20Tracked/home.dart';
 import 'package:gentech/view/To%20Be%20Tracked/login_or_signup.dart';
 import 'package:gentech/view/To%20Be%20Tracked/notification.dart';
+import 'package:gentech/view/To%20Be%20Tracked/payment_screens.dart';
 import 'package:gentech/view/To%20Be%20Tracked/profile_screen.dart';
 import 'package:gentech/view/To%20Be%20Tracked/reset_password.dart';
+import 'package:gentech/view/To%20Be%20Tracked/side_drawer.dart';
 import 'package:gentech/view/To%20Be%20Tracked/sign_in.dart';
 import 'package:gentech/view/To%20Be%20Tracked/sign_up.dart';
 import 'package:gentech/view/To%20Be%20Tracked/verification_screen.dart';
 import 'package:gentech/view/Tracking/home_tracking.dart';
 import 'package:gentech/view/Tracking/live_tracking.dart';
 import 'package:gentech/view/Tracking/set_reminder.dart';
-import 'package:gentech/view/Tracking/tracking_add_number.dart';
 import 'package:gentech/view/Tracking/tracking_alert.dart';
 import 'package:gentech/view/Tracking/tracking_location.dart';
 import 'package:gentech/view/Tracking/unlock_phone.dart';
@@ -66,7 +67,9 @@ class Routes {
       case RoutesName.trackingAlert:
         return MaterialPageRoute(builder: (_) => const TrackingAlert());
       case RoutesName.trackingaddnumber:
-        return MaterialPageRoute(builder: (_) => const TrackingAddNumber());
+      // return MaterialPageRoute(builder: (_) => const TrackingAddNumber());
+      case RoutesName.paymentscreen:
+        return MaterialPageRoute(builder: (_) => const PaymentScreen());
 
       default:
         return MaterialPageRoute(builder: (_) {
@@ -122,7 +125,12 @@ class Routes {
       case RoutesName.trackingAlert:
         return const TrackingAlert();
       case RoutesName.trackingaddnumber:
-        return const TrackingAddNumber();
+      // return const TrackingAddNumber();
+      case RoutesName.paymentscreen:
+        return const PaymentScreen();
+      case RoutesName.drawer:
+        return const SideDrawer();
+
       default:
         return Scaffold(
           body: Center(

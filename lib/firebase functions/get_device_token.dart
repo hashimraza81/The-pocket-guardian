@@ -7,7 +7,7 @@ Future<String?> getDeviceTokenFromContact(Contact contacts) async {
 
     // Fetch the user's document using the reference stored in the contact
     DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .doc(contacts.reference) // 'refere  nce' field in the Contact document
+        .doc(contacts.reference!) // 'refere  nce' field in the Contact document
         .get();
 
     if (userDoc.exists) {

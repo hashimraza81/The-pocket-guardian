@@ -9,7 +9,7 @@ class AppImages extends AssetImage {
 
   static const String splash = '$_assetsPath/splashscreen.png';
   static const String splash2 = '$_assetsPath/splashscreen2.png';
-  static const String logo = '$_assetsPath/logogentech.png';
+  static const String logo = '$_assetsPath/logopg.png';
   static const String login = '$_assetsPath/loginscreen.png';
   static const String resetComplete = '$_assetsPath/resetComplete.png';
   static const String home = '$_assetsPath/dashboardbg.jpg';

@@ -5,12 +5,13 @@ import 'package:gentech/const/app_colors.dart';
 import 'package:gentech/const/app_images.dart';
 import 'package:gentech/extension/sizebox_extension.dart';
 import 'package:gentech/provider/places_provider.dart';
-import 'package:gentech/provider/profile_Provider.dart';
-import 'package:gentech/provider/user_choice_provider.dart';
 import 'package:gentech/utils/contact_listview.dart';
 import 'package:intl/intl.dart';
 import 'package:map_location_picker/map_location_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
+
+import '../../provider/provider.dart';
 
 class SetGpsScreen extends StatefulWidget {
   const SetGpsScreen({super.key});
@@ -83,16 +84,25 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
   }
 
   Future<void> fetchUserProfile(BuildContext context) async {
-    String userRole =
-        Provider.of<UserChoiceProvider>(context, listen: false).userChoice;
-    await Provider.of<UserProfileProvider>(context, listen: false)
-        .fetchUserProfile(context, userRole);
+    await Provider.of<ProfileProvider>(context, listen: false).fetchUserData();
+  }
+
+  void _showLoadingIndicator(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final locationProvider = Provider.of<LocationPlacesProvider>(context);
-    final userProfileProvider = Provider.of<UserProfileProvider>(context);
+    final profileProvider = Provider.of<ProfileProvider>(context);
     String formattedDate =
         DateFormat('EEE d, MMM • hh:mm a').format(DateTime.now());
     return SafeArea(
@@ -152,16 +162,57 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 30.r,
-                          backgroundImage:
-                              userProfileProvider.profileImageUrl.isNotEmpty
-                                  ? NetworkImage(
-                                      userProfileProvider.profileImageUrl)
-                                  : const AssetImage(AppImages.men)
-                                      as ImageProvider,
-                          backgroundColor: Colors.transparent,
-                        ),
+                        profileProvider.isFetchingImage
+                            ? Shimmer.fromColors(
+                                baseColor: Colors.grey[300]!,
+                                highlightColor: Colors.grey[100]!,
+                                child: CircleAvatar(
+                                  radius: 30.r,
+                                  backgroundColor: Colors.grey[300],
+                                ),
+                              )
+                            : CircleAvatar(
+                                radius: 30.r,
+                                backgroundImage: profileProvider.pickedImage !=
+                                        null
+                                    ? FileImage(profileProvider.pickedImage!)
+                                    : profileProvider.imageUrl.isNotEmpty
+                                        ? NetworkImage(profileProvider.imageUrl)
+                                        : null, // No image if URL is empty
+                                backgroundColor: Colors.transparent,
+                                child: profileProvider.imageUrl.isEmpty &&
+                                        profileProvider.pickedImage == null
+                                    ? CircleAvatar(
+                                        radius: 30.r,
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 30.w,
+                                          color: Colors.grey,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                        // CircleAvatar(
+                        //   radius: 30.r,
+                        //   backgroundImage:
+                        //       userProfileProvider.profileImageUrl.isNotEmpty
+                        //           ? NetworkImage(
+                        //               userProfileProvider.profileImageUrl)
+                        //           : null, // No image when URL is empty
+                        //   backgroundColor: Colors.transparent,
+                        //   child: userProfileProvider.profileImageUrl.isEmpty
+                        //       ? CircleAvatar(
+                        //           radius: 30.r,
+                        //           child: Icon(
+                        //             Icons
+                        //                 .person, // Display person icon when no image
+                        //             size: 30.r, // Adjust icon size as needed
+                        //             color: Colors
+                        //                 .grey, // Adjust icon color as needed
+                        //           ),
+                        //         )
+                        //       : null, // No child when there is an image
+                        // ),
                         10.0.pw,
                         Expanded(
                           child: Column(
@@ -178,7 +229,7 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
                               ),
                               Text(
                                 locationProvider.currentAddress ??
-                                    'Set Gps location',
+                                    'Set GPS location',
                                 style: TextStyle(
                                   fontSize: 16.0.sp,
                                   fontWeight: FontWeight.w600,
@@ -189,17 +240,17 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
                             ],
                           ),
                         ),
-                        InkWell(
-                          onTap: () async {
-                            await locationProvider.getUserCurrentLocation();
-                          },
-                          child: SvgPicture.asset(
-                            AppImages.refresh,
-                            color: AppColors.secondary,
-                            height: 30.h,
-                            width: 30.w,
-                          ),
-                        ),
+                        // InkWell(
+                        //   onTap: () async {
+                        //     await locationProvider.getUserCurrentLocation();
+                        //   },
+                        //   child: SvgPicture.asset(
+                        //     AppImages.refresh,
+                        //     color: AppColors.secondary,
+                        //     height: 30.h,
+                        //     width: 30.w,
+                        //   ),
+                        // ),
                       ],
                     ),
                     10.0.ph,
@@ -215,18 +266,20 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
                                   color: AppColors.grey4, width: 1),
                             ),
                           ),
-                          onPressed: () {
-                            locationProvider.getUserCurrentLocation();
+                          onPressed: () async {
+                            _showLoadingIndicator(context);
+                            await locationProvider.getUserCurrentLocation();
+                            Navigator.pop(context);
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               SvgPicture.asset(AppImages.gpslogo),
                               8.0.pw,
-                              Text(
+                              const Text(
                                 'Set GPS Location',
                                 style: TextStyle(
-                                  fontSize: 14.0.sp,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Montserrat',
                                   color: AppColors.primary,
@@ -251,10 +304,10 @@ class _SetGpsScreenState extends State<SetGpsScreen> {
                             children: [
                               SvgPicture.asset(AppImages.share),
                               8.0.pw,
-                              Text(
+                              const Text(
                                 'Share',
                                 style: TextStyle(
-                                  fontSize: 14.0.sp,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                   fontFamily: 'Montserrat',
                                   color: AppColors.white,
@@ -288,26 +341,28 @@ class CustomDialog extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.symmetric(
           vertical: 16.0.h,
-          horizontal: 16.0.w,
+          horizontal: 1.0.w,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                'Contacts',
-                style: TextStyle(
-                  fontSize: 18.0.sp,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: 'Montserrat',
-                  color: AppColors.primary,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Align(
+                // alignment: Alignment.topLeft,
+                child: Text(
+                  'Contacts',
+                  style: TextStyle(
+                    fontSize: 18.0.sp,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Montserrat',
+                    color: AppColors.primary,
+                  ),
                 ),
               ),
-            ),
-            16.0.ph,
-            const ContactListview(),
-          ],
+              0.ph,
+              const ContactListview(),
+            ],
+          ),
         ),
       ),
     );

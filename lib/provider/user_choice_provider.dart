@@ -22,4 +22,11 @@ class UserChoiceProvider with ChangeNotifier {
     _userChoice = prefs.getString('userChoice') ?? 'Track';
     notifyListeners();
   }
+
+  Future<void> clearUserProfileCache() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    // print('cls cache');
+    notifyListeners(); // Notify listeners about the state change
+  }
 }

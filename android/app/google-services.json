@@ -12,7 +12,12 @@
           "package_name": "com.example.gentech"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "208166400766-k6h0gu3d7lrrc29lrpirnjr352iuin36.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDy0LudoUR62bIODsj_D0JPPeUOKvR1lQo"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "208166400766-k6h0gu3d7lrrc29lrpirnjr352iuin36.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "208166400766-tm0o6r901asgl505a5q64aocl9ga9tlf.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gentech"
+              }
+            }
+          ]
         }
       }
     }

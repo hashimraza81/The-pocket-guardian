@@ -4,6 +4,7 @@ class UserModel {
   String name;
   String phonenumber;
   String? imageUrl;
+  bool? subscribed;
 
   UserModel({
     required this.uid,
@@ -11,16 +12,17 @@ class UserModel {
     required this.name,
     required this.phonenumber,
     this.imageUrl,
+    this.subscribed,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> data) {
     return UserModel(
-      uid: data['uid'],
-      email: data['email'],
-      name: data['name'],
-      phonenumber: data['phonenumber'],
-      imageUrl: data['imageUrl'],
-    );
+        uid: data['uid'],
+        email: data['email'],
+        name: data['name'],
+        phonenumber: data['phonenumber'],
+        imageUrl: data['imageUrl'],
+        subscribed: data['subscribed']);
   }
 
   Map<String, dynamic> toMap() {
@@ -30,6 +32,7 @@ class UserModel {
       'name': name,
       'phonenumber': phonenumber,
       'imageUrl': imageUrl,
+      'subcribed': subscribed,
     };
   }
 }

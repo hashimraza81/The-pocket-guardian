@@ -19,17 +19,11 @@ class _SignInState extends State<SignIn> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final bool _showSuccessMessage = false;
-  // @override
-  // void dispose() {
-  //   emailController.dispose();
-  //   passwordController.dispose();
-  //   super.dispose();
-  // }
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode passwordFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
-    // final userChoice = Provider.of<UserChoiceProvider>(context).userChoice;
-
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -69,6 +63,8 @@ class _SignInState extends State<SignIn> {
                     text: 'Email',
                     iconData: Icons.mail_outline,
                     toHide: false,
+                    focusNode: emailFocusNode,
+                    nextFocusNode: passwordFocusNode,
                   ),
                   24.ph,
                   CustomText(
@@ -84,6 +80,7 @@ class _SignInState extends State<SignIn> {
                     text: 'Password',
                     iconData: Icons.password_outlined,
                     toHide: true,
+                    focusNode: passwordFocusNode,
                   ),
                   24.ph,
                   Center(
@@ -93,7 +90,7 @@ class _SignInState extends State<SignIn> {
                         // Call the sign-in function
                         FirebaseFunctions.signInFunction(
                           context,
-                          emailController.text,
+                          emailController.text.trim(),
                           passwordController.text,
                         );
                       },

@@ -11,6 +11,7 @@ import 'package:gentech/utils/custom_text_widget.dart';
 import 'package:gentech/utils/phone_number_field.dart';
 import 'package:gentech/utils/reused_button.dart';
 import 'package:gentech/utils/reused_text_field.dart';
+import 'package:gentech/utils/snackbar.dart';
 import 'package:gentech/utils/upload_profile_photo.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -29,9 +30,16 @@ class _SignUpState extends State<SignUp> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController phonenumberController = TextEditingController();
 
+  final FocusNode emailFocusNode = FocusNode();
+  final FocusNode passwordFocusNode = FocusNode();
+  final FocusNode confirmFocusNode = FocusNode();
+  final FocusNode usernameFocusNode = FocusNode();
+  final FocusNode phoneFocusNode = FocusNode();
+
   final ImagePicker _imagePicker = ImagePicker();
   String? imageUrl;
   bool isLoading = false;
+  String _selectedRole = 'Track';
 
   Future<void> pickImage() async {
     try {
@@ -40,12 +48,13 @@ class _SignUpState extends State<SignUp> {
         await uploadImageToFirebase(File(res.path));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.red,
-          content: Text('Failed to pick image: $e'),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     backgroundColor: AppColors.red,
+      //     content: Text('Failed to pick image: $e'),
+      //   ),
+      // );
+      showTopSnackBar(context, 'Failed to pick image: $e', Colors.red);
     }
   }
 
@@ -58,22 +67,23 @@ class _SignUpState extends State<SignUp> {
           .ref()
           .child("images/${DateTime.now().microsecondsSinceEpoch}.png");
       await reference.putFile(image).whenComplete(() {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: AppColors.primary,
-            duration: Duration(seconds: 2),
-            content: Text('Upload Successfully:'),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     backgroundColor: AppColors.primary,
+        //     duration: Duration(seconds: 2),
+        //     content: Text('Upload Successfully:'),
+        //   ),
+        // );
       });
       imageUrl = await reference.getDownloadURL();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: AppColors.red,
-          content: Text('Failed to upload image: $e'),
-        ),
-      );
+      showTopSnackBar(context, 'Failed to upload image: $e', Colors.red);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     backgroundColor: AppColors.red,
+      //     content: Text('Failed to upload image: $e'),
+      //   ),
+      // );
     }
     setState(() {
       isLoading = false;
@@ -159,6 +169,8 @@ class _SignUpState extends State<SignUp> {
                     text: 'Name',
                     iconData: Icons.person_2_outlined,
                     toHide: false,
+                    focusNode: usernameFocusNode,
+                    nextFocusNode: emailFocusNode,
                   ),
                   10.ph,
                   CustomText(
@@ -174,6 +186,8 @@ class _SignUpState extends State<SignUp> {
                     text: 'Email',
                     iconData: Icons.mail_outline,
                     toHide: false,
+                    focusNode: emailFocusNode,
+                    nextFocusNode: passwordFocusNode,
                   ),
                   10.ph,
                   CustomText(
@@ -189,6 +203,8 @@ class _SignUpState extends State<SignUp> {
                     text: 'Password',
                     iconData: Icons.password_outlined,
                     toHide: true,
+                    focusNode: passwordFocusNode,
+                    nextFocusNode: confirmFocusNode,
                   ),
                   10.ph,
                   CustomText(
@@ -201,9 +217,11 @@ class _SignUpState extends State<SignUp> {
                   10.ph,
                   CustomTextField(
                     controller: confirmPasswordController,
-                    text: 'Password',
+                    text: 'Confirm Password',
                     iconData: Icons.password_outlined,
                     toHide: true,
+                    focusNode: confirmFocusNode,
+                    nextFocusNode: phoneFocusNode,
                   ),
                   10.ph,
                   CustomText(
@@ -217,6 +235,66 @@ class _SignUpState extends State<SignUp> {
                   PhoneNumberField(
                     controller: phonenumberController,
                   ),
+                  10.ph,
+                  CustomText(
+                    text: 'Create With',
+                    size: 16.sp,
+                    familyFont: 'Montserrat',
+                    color: AppColors.grey3,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  10.ph,
+                  DropdownButtonFormField<String>(
+                    value: _selectedRole,
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.h, horizontal: 16.w),
+                      border: InputBorder.none, // Removes the border
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(20.r), // Circular shape
+                        borderSide: BorderSide.none, // No border line
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                            30.r), // Circular shape when focused
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: AppColors.white,
+                    ),
+                    dropdownColor: AppColors.white,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: AppColors.primary,
+                      size: 24.sp,
+                    ),
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 16.sp,
+                      fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.w500,
+                    ),
+                    items: ['Track', 'Tracking'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 14.sp,
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        _selectedRole = newValue!;
+                      });
+                    },
+                  ),
                   20.ph,
                   Center(
                     child: ReusedButton(
@@ -229,6 +307,8 @@ class _SignUpState extends State<SignUp> {
                           usernameController.text.toString(),
                           phonenumberController.text.toString(),
                           imageUrl,
+                          false,
+                          _selectedRole,
                         );
                       },
                       colorbg: AppColors.secondary,
